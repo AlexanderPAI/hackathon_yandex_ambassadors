@@ -162,3 +162,9 @@ cython_debug/
 # Google Sheets API credentials and tokens
 credentials.json
 token.json
+
+# Dump files
+dump*
+
+# Static files
+static/
