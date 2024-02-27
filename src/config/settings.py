@@ -20,8 +20,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+
+AUTH_USER_MODEL = "users.User"
+
 # For django-debug-toolbar
 INTERNAL_IPS = ['127.0.0.1']
+
 
 # Application definition
 
