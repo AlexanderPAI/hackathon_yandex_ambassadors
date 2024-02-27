@@ -165,3 +165,6 @@ token.json
 
 # Dump files
 dump*
+
+# Static files
+static/

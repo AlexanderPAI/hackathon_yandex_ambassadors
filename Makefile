@@ -39,3 +39,6 @@ dumpdb:
 
 loaddb:
 	cd src; python3 manage.py loaddata dump.json
+
+collectstatic:
+	cd src; python3 manage.py collectstatic --no-input
