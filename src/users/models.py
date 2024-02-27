@@ -3,8 +3,10 @@ from django.contrib.auth.models import AbstractUser
 
 
 ROLE_1 = "ROLE 1"
+ROLE_2 = "ROLE 2"
 ROLE_CHOICES = (
-    (ROLE_1, "Роль 1"),
+    (ROLE_1, "Менеджер"),
+    (ROLE_2, "Амбассадор"),
 )
 
 
