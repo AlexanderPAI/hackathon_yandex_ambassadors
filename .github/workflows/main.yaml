@@ -37,6 +37,7 @@ jobs:
 
       - name: Test with flake8
         run: |
+          cd src
           python -m flake8
 
       - name: Send success message
