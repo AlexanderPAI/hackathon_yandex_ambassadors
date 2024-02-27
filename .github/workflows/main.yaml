@@ -41,7 +41,7 @@ jobs:
           python -m flake8
 
       - name: Send success message
-        if: ${{ github.ref != 'refs/heads/develop' }}
+        # if: ${{ github.ref != 'refs/heads/develop' }}
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
