@@ -1,5 +1,7 @@
 import re
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import response, status, viewsets
 from rest_framework.decorators import action
 
@@ -24,6 +26,16 @@ YEAR_MONTHS = [
     ("december", 12),
 ]
 
+year = openapi.Parameter(
+    "year",
+    openapi.IN_QUERY,
+    description=(
+        "desired year, enter 4 digits in the format 1XXX or 2XXX "
+        "or you will receive 400 Bad request"
+    ),
+    type=openapi.TYPE_INTEGER,
+)
+
 
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """ViewSet for merch applications and annual merch budgets."""
@@ -43,6 +55,7 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             return YearBudgetSerializer
         return MerchApplicationSerializer
 
+    @swagger_auto_schema(manual_parameters=[year])
     @action(methods=["get"], detail=False)
     def year_budget(self, request):
         """
@@ -51,8 +64,8 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
         You need to pass the required year to the parameters like this: ?year=2023
         Otherwise you will receive 400 Bad request.
         """
-        year_from_params = self.request.query_params.get("year", "")
-        year = year_from_params if re.match(r"[0-9]{4}", year_from_params) else None
+        year_param = self.request.query_params.get("year", "")
+        year = year_param if re.match(r"[1-2][0-9]{3}", year_param) else None
         year_qs = self.get_queryset().filter(created__year=year)
         year_total = sum([application.merch_cost for application in year_qs])
 
