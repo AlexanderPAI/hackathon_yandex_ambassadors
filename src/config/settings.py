@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # Third parties apps
     "rest_framework",
     "debug_toolbar",
+    "drf_yasg",
     # Project's own apps
     "accounting",
     "ambassadors",
@@ -133,3 +134,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# DRF-yasg Swagger settings
+
+# TODO: Change if we do not use rest_framework.authtoken to authorize users
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Token": {"type": "apiKey", "name": "Authorization", "in": "header"}
+    }
+}
