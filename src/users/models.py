@@ -1,6 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.db import models
 
 ROLE_1 = "ROLE 1"
 ROLE_2 = "ROLE 2"
