@@ -65,7 +65,8 @@ class MerchApplicationAdmin(admin.ModelAdmin):
         ).annotate(
             merch_cost=Sum(
                 F("merch_in_applications__quantity")
-                * F("merch_in_applications__merch__cost")
+                * F("merch_in_applications__merch__cost"),
+                default=0,
             ),
         )
 
