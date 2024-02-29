@@ -43,8 +43,7 @@ def get_public_sheet_values(sheet_id: str, cell_range: str) -> list[str]:
     """
     sheets = authenticate_sheets_by_api_key(API_KEY)
     result = sheets.values().get(spreadsheetId=sheet_id, range=cell_range).execute()
-    values = result.get("values", [])
-    return values
+    return result.get("values", [])
 
 
 def authenticate_sheets_by_oauth_credentials():
