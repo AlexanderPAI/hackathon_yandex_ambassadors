@@ -168,3 +168,6 @@ dump*
 
 # Static files
 static/
+
+# VSCode
+.vscode
