@@ -1,8 +1,9 @@
 import re
 
+from django_filters import rest_framework as rf_filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import response, status, viewsets
+from rest_framework import filters, response, status, viewsets
 from rest_framework.decorators import action
 
 from .promo_serializers import MerchApplicationSerializer, YearBudgetSerializer
@@ -35,7 +36,6 @@ year = openapi.Parameter(
 )
 
 
-# TODO: выводит список заявок в странном порядке - не по id
 # TODO: check all Swagger fields and responses, add 4XX responses
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """ViewSet for merch applications and annual merch budgets."""
@@ -44,6 +44,8 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
     # pagination_class and ordering options
     queryset = MerchApplication.objects.all()
     serializer_class = MerchApplicationSerializer
+    filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
+    ordering = ["pk"]
 
     def get_queryset(self):
         return MerchApplicationSerializer.setup_eager_loading(

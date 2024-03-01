@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "drf_yasg",
+    "django_filters",
     # Project's own apps
     "accounting",
     "ambassadors",
