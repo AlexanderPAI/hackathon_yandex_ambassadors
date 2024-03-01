@@ -3,9 +3,10 @@ import re
 from django_filters import rest_framework as rf_filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import filters, response, status, viewsets
+from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
+from .pagination import CustomPageNumberPagination
 from .promo_serializers import MerchApplicationSerializer, YearBudgetSerializer
 from ambassadors.models import Ambassador
 from promo.models import MerchApplication
@@ -36,15 +37,29 @@ year = openapi.Parameter(
 )
 
 
-# TODO: check all Swagger fields and responses, add 4XX responses
+# TODO: check all Swagger fields and responses, add 4XX responses,
+# install drf-standardized-errors
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """ViewSet for merch applications and annual merch budgets."""
 
-    # TODO: add http_method_names, permission_classes, filter_backends, filterset_class,
-    # pagination_class and ordering options
+    # TODO: make filtering of merch applications (filter_backends, filterset_class)
+    # TODO: request.user should be automatically registered as a tutor during merch
+    # application creation
+    # TODO: when creating merch application, a unique number should be automatically
+    # generated and assigned to it
+    # TODO: when creating merch application, merch instances must be assigned to it
+    # (nested serializer, many-to-many relationships - MerchInApplication model)
+    # TODO: authenticated user can edit and delete only his/her own merch applications
+    # TODO: when editing/deletion merch application, MerchInApplication instances
+    # should be treated properly
+    http_method_names = ["get", "post", "patch", "delete"]
     queryset = MerchApplication.objects.all()
     serializer_class = MerchApplicationSerializer
+    # TODO: while authentication using API tokens is not ready, it is possible
+    # to log in admin panel, and authentification will be treated as completed :)
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
+    pagination_class = CustomPageNumberPagination
     ordering = ["pk"]
 
     def get_queryset(self):
