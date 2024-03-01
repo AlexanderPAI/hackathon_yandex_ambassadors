@@ -6,9 +6,7 @@ from rest_framework import response, status, viewsets
 from rest_framework.decorators import action
 
 from .promo_serializers import MerchApplicationSerializer, YearBudgetSerializer
-
-# TODO: uncomment when the Ambassador model will be ready
-# from ambassadors.models import Ambassador
+from ambassadors.models import Ambassador
 from promo.models import MerchApplication
 
 YEAR_MONTHS = [
@@ -37,8 +35,8 @@ year = openapi.Parameter(
 )
 
 
+# TODO: выводит список заявок в странном порядке - не по id
 # TODO: check all Swagger fields and responses, add 4XX responses
-# TODO: Should the user see only his ambassadors or all of them?
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """ViewSet for merch applications and annual merch budgets."""
 
@@ -57,7 +55,6 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             return YearBudgetSerializer
         return MerchApplicationSerializer
 
-    # TODO: Should the user see only his ambassadors or all of them?
     @swagger_auto_schema(manual_parameters=[year])
     @action(methods=["get"], detail=False)
     def year_budget(self, request):
@@ -78,38 +75,36 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             month_total = sum([application.merch_cost for application in month_qs])
             months.append({"month": month[0], "month_total": month_total})
 
-        # TODO: uncomment when the Ambassador model will be ready
-        # ambassadors = Ambassador.objects.all()
-        # ambassadors_budgets = []
-        # for person in ambassadors:
-        #     ambassador_qs = year_qs.filter(ambassador=person)
-        #     ambassador_year_total = sum(
-        #         [application.merch_cost for application in ambassador_qs]
-        #     )
-        #     ambassador_months_budgets = []
-        #     for month in YEAR_MONTHS:
-        #         ambassador_month_qs = ambassador_qs.filter(created__month=month[1])
-        #         ambassador_month_total = sum(
-        #             [application.merch_cost for application in ambassador_month_qs]
-        #         )
-        #         ambassador_months_budgets.append(
-        #             {"month": month[0], "month_total": ambassador_month_total}
-        #         )
+        ambassadors = Ambassador.objects.all()
+        ambassadors_budgets = []
+        for person in ambassadors:
+            ambassador_qs = year_qs.filter(ambassador=person)
+            ambassador_year_total = sum(
+                [application.merch_cost for application in ambassador_qs]
+            )
+            ambassador_months_budgets = []
+            for month in YEAR_MONTHS:
+                ambassador_month_qs = ambassador_qs.filter(created__month=month[1])
+                ambassador_month_total = sum(
+                    [application.merch_cost for application in ambassador_month_qs]
+                )
+                ambassador_months_budgets.append(
+                    {"month": month[0], "month_total": ambassador_month_total}
+                )
 
-        #     ambassadors_budgets.append(
-        #         {
-        #             "ambassador_name": person.name,
-        #             "ambassador_year_total": ambassador_year_total,
-        #             "ambassador_months_budgets": ambassador_months_budgets,
-        #         }
-        #     )
+            ambassadors_budgets.append(
+                {
+                    "ambassador_name": person.name,
+                    "ambassador_year_total": ambassador_year_total,
+                    "ambassador_months_budgets": ambassador_months_budgets,
+                }
+            )
 
         payload = {
             "year": year,
             "year_total": year_total,
             "months": months,
-            # TODO: uncomment when the Ambassador model will be ready
-            # "ambassadors": ambassadors_budgets,
+            "ambassadors": ambassadors_budgets,
         }
         serializer = self.get_serializer_class()(data=payload)
         if not serializer.is_valid():

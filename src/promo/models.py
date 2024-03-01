@@ -3,8 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 
-# TODO: uncomment when the Ambassador model will be ready
-# from ambassadors.models import Ambassador
+from ambassadors.models import Ambassador
 from users.models import User
 
 
@@ -36,8 +35,6 @@ class Merch(models.Model):
     will be deleted as well.
     """
 
-    # the name field is non-unique so that we can store merch items with the same names,
-    # but different sizes, but the name and size combination must be unique
     name = models.CharField("Name", max_length=100)
     category = models.ForeignKey(
         MerchCategory,
@@ -75,9 +72,12 @@ class Promocode(models.Model):
     """Describes ambassadors' promocodes."""
 
     code = models.CharField("Code", max_length=20, unique=True)
-    # TODO: make it (ambassador field) ForeignKey referencing Ambassador model,
-    # on_delete=models.CASCADE, related_name="promocodes"
-    ambassador = models.IntegerField(verbose_name="Ambassador")
+    ambassador = models.ForeignKey(
+        Ambassador,
+        on_delete=models.CASCADE,
+        related_name="promocodes",
+        verbose_name="Ambassador",
+    )
     created = models.DateTimeField("Creation time", default=timezone.now)
     is_active = models.BooleanField("Is active", default=True)
 
@@ -93,19 +93,13 @@ class Promocode(models.Model):
 class MerchApplication(models.Model):
     """Describes applications for sending merch to ambassadors."""
 
-    # Comment: we need this field (application_number) to make it convenient
-    # to distinguish merch applications in the Admin panel,
-    # in the Admin panel we fill it out manually, but at the API level
-    # it will be filled in automatically
     application_number = models.CharField("Number", max_length=50, unique=True)
-    # TODO: make ambassador field like this:
-    # ambassador = models.ForeignKey(
-    #     Ambassador,
-    #     on_delete=models.CASCADE,
-    #     related_name="merch_applications",
-    #     verbose_name="Ambassador",
-    # )
-    ambassador = models.IntegerField(verbose_name="Ambassador")
+    ambassador = models.ForeignKey(
+        Ambassador,
+        on_delete=models.CASCADE,
+        related_name="merch_applications",
+        verbose_name="Ambassador",
+    )
     tutor = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

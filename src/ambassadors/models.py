@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
 
-
 # TODO Поле gender, отдельные таблицы или enums
 
 
