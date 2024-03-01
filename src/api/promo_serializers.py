@@ -40,7 +40,7 @@ class AmbassadorBudgetSerializer(serializers.Serializer):
 
     ambassador_name = serializers.CharField()
     ambassador_year_total = serializers.FloatField()
-    ambassador_months_budgets = MonthBudgetSerializer(many=True, required=False)
+    ambassador_months_budgets = MonthBudgetSerializer(many=True)
 
 
 class YearBudgetSerializer(serializers.Serializer):
@@ -49,5 +49,4 @@ class YearBudgetSerializer(serializers.Serializer):
     year = serializers.IntegerField()
     year_total = serializers.FloatField()
     months = MonthBudgetSerializer(many=True)
-    # TODO: remove "required=False" when the Ambassador model will be ready
-    ambassadors = AmbassadorBudgetSerializer(many=True, required=False)
+    ambassadors = AmbassadorBudgetSerializer(many=True)
