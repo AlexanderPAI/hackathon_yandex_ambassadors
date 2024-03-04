@@ -6,8 +6,14 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
-from .pagination import CustomPageNumberPagination
-from .promo_serializers import MerchApplicationSerializer, YearBudgetSerializer
+from .filters import MerchApplicationsFilter
+from .permissions import IsTutorOrReadOnly
+from .promo_serializers import (
+    MerchApplicationCreateUpdateSerializer,
+    MerchApplicationSerializer,
+    YearBudgetSerializer,
+)
+from .utils import generate_application_number
 from ambassadors.models import Ambassador
 from promo.models import MerchApplication
 
@@ -37,29 +43,16 @@ year = openapi.Parameter(
 )
 
 
-# TODO: check all Swagger fields and responses, add 4XX responses,
-# install drf-standardized-errors
+# TODO: add 4XX responses to Swagger api docs
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """ViewSet for merch applications and annual merch budgets."""
 
-    # TODO: make filtering of merch applications (filter_backends, filterset_class)
-    # TODO: request.user should be automatically registered as a tutor during merch
-    # application creation
-    # TODO: when creating merch application, a unique number should be automatically
-    # generated and assigned to it
-    # TODO: when creating merch application, merch instances must be assigned to it
-    # (nested serializer, many-to-many relationships - MerchInApplication model)
-    # TODO: authenticated user can edit and delete only his/her own merch applications
-    # TODO: when editing/deletion merch application, MerchInApplication instances
-    # should be treated properly
     http_method_names = ["get", "post", "patch", "delete"]
     queryset = MerchApplication.objects.all()
     serializer_class = MerchApplicationSerializer
-    # TODO: while authentication using API tokens is not ready, it is possible
-    # to log in admin panel, and authentification will be treated as completed :)
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsTutorOrReadOnly]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    pagination_class = CustomPageNumberPagination
+    filterset_class = MerchApplicationsFilter
     ordering = ["pk"]
 
     def get_queryset(self):
@@ -70,7 +63,14 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "year_budget":
             return YearBudgetSerializer
+        if self.action in ["create", "partial_update"]:
+            return MerchApplicationCreateUpdateSerializer
         return MerchApplicationSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(
+            tutor=self.request.user, application_number=generate_application_number()
+        )
 
     @swagger_auto_schema(manual_parameters=[year])
     @action(methods=["get"], detail=False)
@@ -85,6 +85,8 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
         year = year_param if re.match(r"[1-2][0-9]{3}", year_param) else None
         year_qs = self.get_queryset().filter(created__year=year)
         year_total = sum([application.merch_cost for application in year_qs])
+        if year_total == 0:
+            return response.Response([], status=status.HTTP_200_OK)
 
         months = []
         for month in YEAR_MONTHS:
@@ -123,7 +125,10 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             "months": months,
             "ambassadors": ambassadors_budgets,
         }
-        serializer = self.get_serializer_class()(data=payload)
+        serializer = self.get_serializer_class()(
+            data=payload,
+            context={"request": request, "format": self.format_kwarg, "view": self},
+        )
         if not serializer.is_valid():
             return response.Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST

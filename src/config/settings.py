@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "djoser",
     "django_filters",
+    "drf_standardized_errors",
     # Project's own apps
     "accounting",
     "ambassadors",
@@ -147,7 +148,10 @@ SWAGGER_SETTINGS = {
     }
 }
 
+# DRF Settings
+
 REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
