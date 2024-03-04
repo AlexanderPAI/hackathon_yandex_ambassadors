@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Ambassador, Group, Program, Purpose, Status
+from .models import Address, Ambassador, Group, Program, Purpose, Status
 
 
 @admin.register(Ambassador)
@@ -13,10 +13,15 @@ class AmbassadorAdmin(admin.ModelAdmin):
         "status",
         "tutor",
     )
-    exclude = ("address",)
+    # exclude = ("address",)
     list_display_links = ("name",)
     list_filter = ("program", "status")
     ordering = ("-created",)
+
+
+@admin.register(Address)
+class AddressAdmin(admin.ModelAdmin):
+    list_display = ("pk", "postal_code", "country", "city", "street")
 
 
 @admin.register(Group)

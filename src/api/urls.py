@@ -10,7 +10,7 @@ app_name = "api"
 
 router = DefaultRouter()
 
-router.register("merch_applications", MerchApplicationViewSet)
+router.register("send_merch", MerchApplicationViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),

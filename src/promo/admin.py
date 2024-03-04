@@ -90,6 +90,6 @@ class PromocodeAdmin(admin.ModelAdmin):
 
     list_display = ["pk", "code", "ambassador", "created", "is_active"]
     list_display_links = ["code"]
-    search_fields = ["code", "ambassador"]  # TODO: change to "ambassador__name"
+    search_fields = ["code", "ambassador__name"]
     list_filter = ["is_active", "created"]
     ordering = ["pk"]

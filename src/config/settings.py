@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "drf_yasg",
     "djoser",
+    "django_filters",
     # Project's own apps
     "accounting",
     "ambassadors",
