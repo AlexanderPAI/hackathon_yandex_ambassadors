@@ -6,6 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
+from .filters import MerchApplicationsFilter
 from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
     MerchApplicationCreateUpdateSerializer,
@@ -47,12 +48,12 @@ year = openapi.Parameter(
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """ViewSet for merch applications and annual merch budgets."""
 
-    # TODO: make filtering of merch applications (filter_backends, filterset_class)
     http_method_names = ["get", "post", "patch", "delete"]
     queryset = MerchApplication.objects.all()
     serializer_class = MerchApplicationSerializer
     permission_classes = [permissions.IsAuthenticated, IsTutorOrReadOnly]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = MerchApplicationsFilter
     ordering = ["pk"]
 
     def get_queryset(self):
