@@ -141,10 +141,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # DRF-yasg Swagger settings
 
-# TODO: Change if we do not use rest_framework.authtoken to authorize users
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
-        "Token": {"type": "apiKey", "name": "Authorization", "in": "header"}
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
     }
 }
 
