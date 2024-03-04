@@ -139,22 +139,22 @@ class MerchApplicationCreateUpdateSerializer(MerchApplicationSerializer):
 class MonthBudgetSerializer(serializers.Serializer):
     """Serializer to display merch budget for months of the year."""
 
-    month = serializers.CharField(read_only=True)
-    month_total = serializers.FloatField(read_only=True)
+    month = serializers.CharField()
+    month_total = serializers.FloatField()
 
 
 class AmbassadorBudgetSerializer(serializers.Serializer):
     """Serializer to display merch budget for individual ambassadors."""
 
-    ambassador_name = serializers.CharField(read_only=True)
-    ambassador_year_total = serializers.FloatField(read_only=True)
-    ambassador_months_budgets = MonthBudgetSerializer(many=True, read_only=True)
+    ambassador_name = serializers.CharField()
+    ambassador_year_total = serializers.FloatField()
+    ambassador_months_budgets = MonthBudgetSerializer(many=True)
 
 
 class YearBudgetSerializer(serializers.Serializer):
     """Serializer to display annual merch budget."""
 
-    year = serializers.IntegerField(read_only=True)
-    year_total = serializers.FloatField(read_only=True)
-    months = MonthBudgetSerializer(many=True, read_only=True)
-    ambassadors = AmbassadorBudgetSerializer(many=True, read_only=True)
+    year = serializers.IntegerField()
+    year_total = serializers.FloatField()
+    months = MonthBudgetSerializer(many=True)
+    ambassadors = AmbassadorBudgetSerializer(many=True)

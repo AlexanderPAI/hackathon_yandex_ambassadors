@@ -6,6 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
+from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
     MerchApplicationCreateUpdateSerializer,
     MerchApplicationSerializer,
@@ -47,11 +48,10 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
     """ViewSet for merch applications and annual merch budgets."""
 
     # TODO: make filtering of merch applications (filter_backends, filterset_class)
-    # TODO: authenticated user can edit and delete only his/her own merch applications
     http_method_names = ["get", "post", "patch", "delete"]
     queryset = MerchApplication.objects.all()
     serializer_class = MerchApplicationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsTutorOrReadOnly]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
     ordering = ["pk"]
 
@@ -85,6 +85,8 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
         year = year_param if re.match(r"[1-2][0-9]{3}", year_param) else None
         year_qs = self.get_queryset().filter(created__year=year)
         year_total = sum([application.merch_cost for application in year_qs])
+        if year_total == 0:
+            return response.Response([], status=status.HTTP_200_OK)
 
         months = []
         for month in YEAR_MONTHS:
@@ -123,7 +125,10 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             "months": months,
             "ambassadors": ambassadors_budgets,
         }
-        serializer = self.get_serializer_class()(data=payload)
+        serializer = self.get_serializer_class()(
+            data=payload,
+            context={"request": request, "format": self.format_kwarg, "view": self},
+        )
         if not serializer.is_valid():
             return response.Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST
