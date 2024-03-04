@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "drf_yasg",
     "django_filters",
+    "drf_standardized_errors",
     # Project's own apps
     "accounting",
     "ambassadors",
@@ -143,4 +144,10 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
         "Token": {"type": "apiKey", "name": "Authorization", "in": "header"}
     }
+}
+
+# DRF Settings
+
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
 }

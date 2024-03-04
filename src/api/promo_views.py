@@ -43,8 +43,7 @@ year = openapi.Parameter(
 )
 
 
-# TODO: check all Swagger fields and responses, add 4XX responses,
-# install drf-standardized-errors
+# TODO: add 4XX responses to Swagger api docs
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """ViewSet for merch applications and annual merch budgets."""
 

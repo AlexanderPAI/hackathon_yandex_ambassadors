@@ -8,6 +8,7 @@ Django==5.0.2
 django-debug-toolbar==4.3.0
 django-filter==23.5
 djangorestframework==3.14.0
+drf-standardized-errors==0.13.0
 drf-yasg==1.21.7
 flake8==7.0.0
 flake8-broken-line==1.0.0
