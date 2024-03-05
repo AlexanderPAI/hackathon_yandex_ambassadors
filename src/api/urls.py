@@ -16,6 +16,8 @@ router.register("edit_history", UserActionsViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("auth/", include("djoser.urls")),
+    path("auth/", include("djoser.urls.jwt")),
 ]
 
 # TODO: add email address and license type
