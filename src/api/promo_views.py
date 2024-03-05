@@ -41,6 +41,16 @@ year = openapi.Parameter(
     ),
     type=openapi.TYPE_INTEGER,
 )
+ambassadors = openapi.Parameter(
+    "ambassadors",
+    openapi.IN_QUERY,
+    description=(
+        "ambassadors whose annual budget we want to see; enter the ambassador ID, "
+        "you can enter several comma separated ambassador IDs"
+    ),
+    type=openapi.TYPE_ARRAY,
+    items=openapi.Items(type=openapi.TYPE_INTEGER),
+)
 
 
 # TODO: add 4XX responses to Swagger api docs
@@ -52,7 +62,7 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
     serializer_class = MerchApplicationSerializer
     permission_classes = [permissions.IsAuthenticated, IsTutorOrReadOnly]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    filterset_class = MerchApplicationsFilter
+    filterset_class = MerchApplicationsFilter  # TODO: disable for annual budget
     ordering = ["pk"]
 
     def get_queryset(self):
@@ -72,7 +82,7 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             tutor=self.request.user, application_number=generate_application_number()
         )
 
-    @swagger_auto_schema(manual_parameters=[year])
+    @swagger_auto_schema(manual_parameters=[year, ambassadors])
     @action(methods=["get"], detail=False)
     def year_budget(self, request):
         """
@@ -83,7 +93,18 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
         """
         year_param = self.request.query_params.get("year", "")
         year = year_param if re.match(r"[1-2][0-9]{3}", year_param) else None
-        year_qs = self.get_queryset().filter(created__year=year)
+        ambassadors_ids = self.request.query_params.get("ambassadors")
+        ambassadors = (
+            Ambassador.objects.filter(id__in=ambassadors_ids.split(","))
+            if ambassadors_ids
+            else Ambassador.objects.all()
+        )
+        year_qs = (
+            self.get_queryset().filter(created__year=year, ambassador__in=ambassadors)
+            if ambassadors_ids
+            else self.get_queryset().filter(created__year=year)
+        )
+
         year_total = sum([application.merch_cost for application in year_qs])
         if year_total == 0:
             return response.Response([], status=status.HTTP_200_OK)
@@ -94,7 +115,6 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             month_total = sum([application.merch_cost for application in month_qs])
             months.append({"month": month[0], "month_total": month_total})
 
-        ambassadors = Ambassador.objects.all()
         ambassadors_budgets = []
         for person in ambassadors:
             ambassador_qs = year_qs.filter(ambassador=person)
