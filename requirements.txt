@@ -10,6 +10,7 @@ defusedxml==0.8.0rc2
 Django==5.0.2
 django-debug-toolbar==4.3.0
 django-filter==23.5
+django-querycount==0.8.3
 django-templated-mail==1.1.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.1

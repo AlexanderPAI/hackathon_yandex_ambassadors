@@ -109,28 +109,30 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             if ambassadors_ids
             else self.get_queryset().filter(created__year=year)
         )
-
-        year_total = sum([application.merch_cost for application in year_qs])
+        year_list = [application for application in year_qs]
+        year_total = sum([application.merch_cost for application in year_list])
         if year_total == 0:
             return response.Response([], status=status.HTTP_200_OK)
 
         months = []
         for month in YEAR_MONTHS:
-            month_qs = year_qs.filter(created__month=month[1])
-            month_total = sum([application.merch_cost for application in month_qs])
+            month_list = [app for app in year_list if app.created.month == month[1]]
+            month_total = sum([application.merch_cost for application in month_list])
             months.append({"month": month[0], "month_total": month_total})
 
         ambassadors_budgets = []
         for person in ambassadors:
-            ambassador_qs = year_qs.filter(ambassador=person)
+            ambassador_list = [app for app in year_list if app.ambassador == person]
             ambassador_year_total = sum(
-                [application.merch_cost for application in ambassador_qs]
+                [application.merch_cost for application in ambassador_list]
             )
             ambassador_months_budgets = []
             for month in YEAR_MONTHS:
-                ambassador_month_qs = ambassador_qs.filter(created__month=month[1])
+                ambassador_month_list = [
+                    app for app in ambassador_list if app.created.month == month[1]
+                ]
                 ambassador_month_total = sum(
-                    [application.merch_cost for application in ambassador_month_qs]
+                    [application.merch_cost for application in ambassador_month_list]
                 )
                 ambassador_months_budgets.append(
                     {"month": month[0], "month_total": ambassador_month_total}

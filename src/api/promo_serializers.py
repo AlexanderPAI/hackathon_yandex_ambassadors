@@ -68,17 +68,23 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
     @classmethod
     def setup_eager_loading(cls, queryset):
         """Performs necessary eager loading of merch applications data."""
-        return queryset.prefetch_related(
-            Prefetch(
-                "merch_in_applications",
-                queryset=MerchInApplication.objects.select_related("merch"),
+        return (
+            queryset.select_related("ambassador")
+            .prefetch_related(
+                Prefetch(
+                    "merch_in_applications",
+                    queryset=MerchInApplication.objects.select_related(
+                        "merch__category"
+                    ),
+                )
             )
-        ).annotate(
-            merch_cost=Sum(
-                F("merch_in_applications__quantity")
-                * F("merch_in_applications__merch__cost"),
-                default=0,
-            ),
+            .annotate(
+                merch_cost=Sum(
+                    F("merch_in_applications__quantity")
+                    * F("merch_in_applications__merch__cost"),
+                    default=0,
+                ),
+            )
         )
 
     def get_merch_cost(self, obj) -> float:

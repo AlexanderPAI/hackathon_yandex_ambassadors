@@ -62,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "querycount.middleware.QueryCountMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -167,4 +168,10 @@ SIMPLE_JWT = {
 DJOSER = {
     "LOGIN_FIELD": "email",
     "SERIALIZERS": {},
+}
+
+# Querycount settings. See https://github.com/bradmontgomery/django-querycount
+
+QUERYCOUNT = {
+    "DISPLAY_DUPLICATES": 1,  # how many duplicated queries to display (None or integer)
 }
