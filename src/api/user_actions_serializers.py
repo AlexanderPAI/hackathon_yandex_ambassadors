@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from django.contrib.admin.models import LogEntry
+from rest_framework import serializers
 
 
 class UserActionsSerializer(serializers.ModelSerializer):
