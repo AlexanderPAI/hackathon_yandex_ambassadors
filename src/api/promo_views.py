@@ -62,7 +62,7 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
     serializer_class = MerchApplicationSerializer
     permission_classes = [permissions.IsAuthenticated, IsTutorOrReadOnly]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    filterset_class = MerchApplicationsFilter  # TODO: disable for annual budget
+    filterset_class = MerchApplicationsFilter
     ordering = ["pk"]
 
     def get_queryset(self):
@@ -83,13 +83,18 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
         )
 
     @swagger_auto_schema(manual_parameters=[year, ambassadors])
-    @action(methods=["get"], detail=False)
+    @action(methods=["get"], detail=False, filter_backends=[])
     def year_budget(self, request):
         """
         Shows the annual merch budget with detailed information
         by months and ambassadors.
-        You need to pass the required year to the parameters like this: ?year=2023
+        You need to pass the required year to the query parameters like this: ?year=2023
         Otherwise you will receive 400 Bad request.
+
+        You can specify the IDs of particular ambassadors in the query parameters
+        to view their annual budgets.
+        You can specify several comma-separated ambassador IDs like this:
+        ?year=2023&ambassadors=1,2
         """
         year_param = self.request.query_params.get("year", "")
         year = year_param if re.match(r"[1-2][0-9]{3}", year_param) else None
