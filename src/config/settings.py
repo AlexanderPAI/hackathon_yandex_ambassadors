@@ -46,12 +46,11 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_standardized_errors",
     # Project's own apps
-    "accounting",
-    "ambassadors",
-    "api",
-    "content",
+    "ambassadors.apps.AmbassadorsConfig",
+    "api.apps.ApiConfig",
+    "content.apps.ContentConfig",
     "promo.apps.PromoConfig",
-    "users",
+    "users.apps.UsersConfig",
 ]
 
 MIDDLEWARE = [

@@ -4,9 +4,6 @@ run:
 makemig:
 	cd src; python3 manage.py makemigrations
 
-makemig-accounting:
-	cd src; python3 manage.py makemigrations accounting
-
 makemig-ambassadors:
 	cd src; python3 manage.py makemigrations ambassadors
 
