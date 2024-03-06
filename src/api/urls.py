@@ -12,6 +12,8 @@ from .promo_views import (
 )
 from .user_actions_views import UserActionsViewSet
 
+from api.content_views import GuideViewSet, GuideKitViewSet, GuideTaskViewSet
+
 app_name = "api"
 
 router = DefaultRouter()
@@ -21,6 +23,9 @@ router.register("merch_price", MerchViewSet)
 router.register("send_merch", MerchApplicationViewSet)
 router.register("promocodes", PromocodeViewSet)
 router.register("edit_history", UserActionsViewSet)
+router.register("guides", GuideViewSet)
+router.register("guide_tasks", GuideTaskViewSet)
+router.register("guide_kits", GuideKitViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
