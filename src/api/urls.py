@@ -5,12 +5,14 @@ from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
 from .promo_views import MerchApplicationViewSet
+from .user_actions_views import UserActionsViewSet
 
 app_name = "api"
 
 router = DefaultRouter()
 
 router.register("send_merch", MerchApplicationViewSet)
+router.register("edit_history", UserActionsViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
