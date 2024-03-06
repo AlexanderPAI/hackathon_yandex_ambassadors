@@ -66,7 +66,6 @@ class MerchApplicationsFilter(rf_filters.FilterSet):
         )
 
 
-# TODO: drf-yasg mistakenly considers the types of all fields to be strings
 class PromocodeFilter(rf_filters.FilterSet):
     """
     Class for filtering promocodes.

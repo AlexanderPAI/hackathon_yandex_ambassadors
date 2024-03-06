@@ -487,7 +487,101 @@ class MerchViewSet(viewsets.ModelViewSet):
         return MerchSerializer.setup_eager_loading(Merch.objects.all())
 
 
-# TODO: add 4XX responses to Swagger api docs
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(
+        operation_summary="Get all promocodes",
+        responses={
+            200: PromocodeSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                "ambassador_name",
+                openapi.IN_QUERY,
+                description="filtering by partial occurrence in ambassador name",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "ambassador_status",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by ambassador status slug, accepts several "
+                    "comma-separated values, for example: "
+                    "?ambassador_status=active,paused"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_SLUG,
+            ),
+            openapi.Parameter(
+                "start_date",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by promocode creation date, "
+                    "input examples: '2020-01-01', '2024-03-04T16:20:55'"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME,
+            ),
+            openapi.Parameter(
+                "end_date",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by promocode creation date, "
+                    "input examples: '2020-01-01', '2024-03-04T16:20:55'"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME,
+            ),
+        ],
+    ),
+)
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(
+        operation_summary="Get promocode by id",
+        responses={
+            200: PromocodeSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="create",
+    decorator=swagger_auto_schema(
+        operation_summary="Create promocode",
+        responses={
+            201: PromocodeSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(
+        operation_summary="Edit promocode",
+        responses={
+            200: PromocodeSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(
+        operation_summary="Delete promocode",
+        responses={
+            204: "",
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
 class PromocodeViewSet(viewsets.ModelViewSet):
     """
     ViewSet for promocodes.

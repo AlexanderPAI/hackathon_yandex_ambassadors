@@ -271,6 +271,7 @@ class MerchCategorySerializer(serializers.ModelSerializer):
         fields = ["id", "name", "slug"]
 
 
+# TODO: separate serializer to create/update merch?
 class MerchSerializer(serializers.ModelSerializer):
     """Serializer for merch species."""
 
@@ -286,6 +287,7 @@ class MerchSerializer(serializers.ModelSerializer):
         return queryset.select_related("category")
 
 
+# TODO: separate serializer to create/update promocodes?
 class PromocodeSerializer(serializers.ModelSerializer):
     """Serializer for promocodes."""
 
