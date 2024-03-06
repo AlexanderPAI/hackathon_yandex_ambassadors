@@ -12,10 +12,8 @@ class GuideTasksInGuideKitsInLine(admin.TabularInline):
 class GuideTaskAdmin(admin.ModelAdmin):
     list_display = [
         "id",
-        "name",
         "type",
     ]
-    search_fields = ["name"]
 
 
 @admin.register(GuideKit)
@@ -40,11 +38,8 @@ class GuideAdmin(admin.ModelAdmin):
         "ambassador",
         "guide_kit",
         "status",
-        "task_count",
-        "counter",
     ]
     search_fields = ["ambassador", "guide_kit"]
-    list_filter = ["status"]
 
 
 @admin.register(MerchPhoto)

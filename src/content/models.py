@@ -7,22 +7,24 @@ from ambassadors.models import Ambassador
 
 class GuideTask(models.Model):
     """Модель такси для гайда."""
-    name = models.CharField(
-        max_length=200,
-        verbose_name='Название',
-    )
+    GUIDE_TASK_TYPE = {
+        "Photo": "Фотография в мерче",
+        "Review": "Отзыв",
+        "Content": "Контент",
+    }
     type = models.CharField(
         max_length=200,
         verbose_name='Тип',
+        choices=GUIDE_TASK_TYPE,
     )
 
     class Meta:
         verbose_name = 'Задача для гайда'
         verbose_name_plural = 'Задачи для гайдов'
-        ordering = ["name"]
+        ordering = ["id"]
 
     def __str__(self):
-        return self.name
+        return self.type
 
 
 class GuideKit(models.Model):
@@ -34,6 +36,10 @@ class GuideKit(models.Model):
     tasks = models.ManyToManyField(
         GuideTask,
         through='GuideTaskGuideKit',
+        through_fields=(
+            'guide_kit',
+            'task'
+        ),
         related_name='guide_kits',
         blank=True
     )
@@ -86,6 +92,12 @@ class GuideStatus(models.Model):
 
 
 class Guide(models.Model):
+    STATUS = {
+        "pause": "На паузе",
+        "not_started": "Не приступил к прохождению",
+        "started": "В процессе прохождения",
+        "complete": "Завершен",
+    }
     ambassador = models.ForeignKey(
         Ambassador,
         on_delete=models.CASCADE,
@@ -96,22 +108,13 @@ class Guide(models.Model):
         GuideKit,
         on_delete=models.CASCADE,
         related_name='guides',
-        verbose_name='Набот тасок',
+        verbose_name='Набор тасок',
     )
-    status = models.ForeignKey(
-        GuideStatus,
-        on_delete=models.SET_NULL,
-        related_name='guides',
+    status = models.CharField(
+        max_length=50,
+        choices=STATUS,
         blank=True,
-        null=True,
         verbose_name='Статус',
-    )
-    # Сделать автоподсчет
-    task_count = models.IntegerField(
-        default=0
-    )
-    counter = models.IntegerField(
-        default=0
     )
 
     class Meta:
@@ -128,7 +131,7 @@ class MerchPhoto(models.Model):
     ambassador = models.ForeignKey(
         Ambassador,
         on_delete=models.CASCADE,
-        related_name='merch_photo',
+        related_name='merch_photos',
         verbose_name='Амбассадор',
     )
     photo = models.ImageField(
@@ -230,7 +233,7 @@ class Content(models.Model):
     ambassador = models.ForeignKey(
         Ambassador,
         on_delete=models.CASCADE,
-        related_name='contents',
+        related_name='content',
         verbose_name='Амбассадор',
     )
     created = models.DateTimeField(
