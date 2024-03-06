@@ -7,7 +7,6 @@ urlpatterns = [
     path("api/v1/", include("api.urls")),
 ]
 
-# TODO: debug_toolbar stopped working in Swagger
 if settings.DEBUG:
     import debug_toolbar
 

@@ -28,15 +28,14 @@ urlpatterns = [
     path("auth/", include("djoser.urls.jwt")),
 ]
 
-# TODO: add email address and license type
 schema_view = get_schema_view(
     openapi.Info(
         title="Hackathon Yandex Ambassadors Team 04 API",
         default_version="v1",
         description="API documentation for the Hackathon Yandex Ambassadors project",
         # terms_of_service="URL страницы с пользовательским соглашением",
-        contact=openapi.Contact(email="<add email>"),
-        license=openapi.License(name="<add license>"),
+        contact=openapi.Contact(email="hackathonyacrm@yandex.kz"),
+        license=openapi.License(name="MIT License"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),

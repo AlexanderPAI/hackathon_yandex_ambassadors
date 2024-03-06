@@ -12,6 +12,7 @@ from promo.models import (
     MerchInApplication,
     Promocode,
 )
+from users.models import User
 
 
 class AddressMerchSerializer(serializers.ModelSerializer):
@@ -30,6 +31,20 @@ class AmbassadorMerchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ambassador
         fields = ["id", "name", "clothing_size", "shoe_size", "address"]
+
+
+class TutorMerchSerializer(serializers.ModelSerializer):
+    """Serializer to display tutor name in merch applications."""
+
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ["id", "full_name"]
+
+    def get_full_name(self, obj) -> str:
+        """Shows tutor full name."""
+        return str(obj)
 
 
 class StatusPromocodeSerializer(serializers.ModelSerializer):
@@ -60,10 +75,24 @@ class MerchInApplicationSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(source="merch.slug", read_only=True)
     size = serializers.ReadOnlyField(source="merch.size")
     cost = serializers.FloatField(source="merch.cost", read_only=True)
+    name_and_size = serializers.SerializerMethodField()
 
     class Meta:
         model = MerchInApplication
-        fields = ("id", "name", "category", "slug", "size", "cost", "quantity")
+        fields = (
+            "id",
+            "name",
+            "size",
+            "name_and_size",
+            "category",
+            "slug",
+            "cost",
+            "quantity",
+        )
+
+    def get_name_and_size(self, obj) -> str:
+        """Shows name and size combination."""
+        return str(obj.merch)
 
 
 class MerchInApplicationCreateUpdateSerializer(MerchInApplicationSerializer):
@@ -94,7 +123,7 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
 
     application_number = serializers.ReadOnlyField()
     ambassador = AmbassadorMerchSerializer()
-    tutor = serializers.PrimaryKeyRelatedField(read_only=True)
+    tutor = TutorMerchSerializer()
     merch = MerchInApplicationSerializer(many=True, source="merch_in_applications")
     merch_cost = serializers.SerializerMethodField()
 
@@ -114,7 +143,7 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
     def setup_eager_loading(cls, queryset):
         """Performs necessary eager loading of merch applications data."""
         return (
-            queryset.select_related("ambassador__address")
+            queryset.select_related("ambassador__address", "tutor")
             .prefetch_related(
                 Prefetch(
                     "merch_in_applications",

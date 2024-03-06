@@ -56,17 +56,18 @@ ambassadors = openapi.Parameter(
 )
 
 
-# TODO: enable ordering by merch cost, merch name,
-# ambassador (by name, clothing_size, shoe_size and address postal code)
 # TODO: add 4XX responses to Swagger api docs
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for merch applications and annual merch budgets.
     Basic merch appications ordering is carried out by ID.
-    You can order them by some other fields (by application_number, ambassador id,
-    tutor id, created) like this: ?ordering=ambassador (in the end of URL).
-    For reverse ordering insert a minus sign before the field name
-    like this: ?ordering=-ambassador
+    You can order them by some other fields: ambassador__name,
+    ambassador__clothing_size, ambassador__shoe_size, ambassador__address__postal_code,
+    application_number, merch__name, 'tutor__first_name,tutor__last_name' (combined
+    curator's first and last names), created.
+    Example: ?ordering=ambassador__name (in the end of URL).
+    For reverse ordering insert a minus sign before the field name like this:
+    ?ordering=-ambassador__name (in the end of URL).
     """
 
     http_method_names = ["get", "post", "patch", "delete"]
@@ -75,6 +76,17 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsTutorOrReadOnly]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = MerchApplicationsFilter
+    ordering_fields = [
+        "ambassador__name",
+        "ambassador__clothing_size",
+        "ambassador__shoe_size",
+        "ambassador__address__postal_code",
+        "application_number",
+        "merch__name",
+        "tutor__first_name",
+        "tutor__last_name",
+        "created",
+    ]
     ordering = ["pk"]
 
     def get_queryset(self):

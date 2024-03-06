@@ -64,7 +64,7 @@ class Merch(models.Model):
 
     def __str__(self):
         if self.size:
-            return f"{self.name}, size {self.size}"
+            return f"{self.name} {self.size}"
         return self.name
 
 
