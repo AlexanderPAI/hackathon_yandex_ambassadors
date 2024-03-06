@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -15,8 +16,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 
+MODE = os.getenv("MODE", default="prod")
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if MODE == "dev":
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -24,7 +30,8 @@ ALLOWED_HOSTS = []
 AUTH_USER_MODEL = "users.User"
 
 # For django-debug-toolbar
-INTERNAL_IPS = ["127.0.0.1"]
+if MODE == "dev":
+    INTERNAL_IPS = ["127.0.0.1"]
 
 
 # Application definition
@@ -41,14 +48,15 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "drf_yasg",
+    "djoser",
     "django_filters",
+    "drf_standardized_errors",
     # Project's own apps
-    "accounting",
-    "ambassadors",
-    "api",
-    "content",
+    "ambassadors.apps.AmbassadorsConfig",
+    "api.apps.ApiConfig",
+    "content.apps.ContentConfig",
     "promo.apps.PromoConfig",
-    "users",
+    "users.apps.UsersConfig",
 ]
 
 MIDDLEWARE = [
@@ -60,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "querycount.middleware.QueryCountMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -86,12 +95,24 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if os.getenv("DOCKER") == "yes":
+    DATABASES = {
+        "default": {
+            "ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.postgresql"),
+            "NAME": os.getenv("DB_NAME", default="postgres"),
+            "USER": os.getenv("POSTGRES_USER", default="postgres"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD", default="postgres"),
+            "HOST": os.getenv("DB_HOST", default="db"),
+            "PORT": os.getenv("DB_PORT", default="5432"),
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
@@ -138,9 +159,50 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # DRF-yasg Swagger settings
 
-# TODO: Change if we do not use rest_framework.authtoken to authorize users
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
-        "Token": {"type": "apiKey", "name": "Authorization", "in": "header"}
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
     }
 }
+
+# DRF Settings
+
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    "SERIALIZERS": {},
+}
+
+# Querycount settings. See https://github.com/bradmontgomery/django-querycount
+
+QUERYCOUNT = {
+    "DISPLAY_DUPLICATES": 3,  # how many duplicated queries to display (None or integer)
+}
+
+# CORS settings for frontend development
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_URLS_REGEX = r"^/api/.*$"
+
+# Security & sessions settings
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True

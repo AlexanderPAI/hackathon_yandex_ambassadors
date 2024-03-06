@@ -18,6 +18,10 @@ class AmbassadorAdmin(admin.ModelAdmin):
     list_filter = ("program", "status")
     ordering = ("-created",)
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.select_related("status", "program")
+
 
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
@@ -48,12 +52,10 @@ class PurposeAdmin(admin.ModelAdmin):
 @admin.register(Status)
 class StatusAdmin(admin.ModelAdmin):
     """Add Status to admin panel"""
-
     list_display = ("name",)
 
 
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
     """Add Activity to admin panel"""
-
     list_display = ("name",)
