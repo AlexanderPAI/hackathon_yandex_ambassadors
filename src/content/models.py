@@ -107,8 +107,20 @@ class Guide(models.Model):
         verbose_name='Статус',
     )
     # Сделать автоподсчет
-    task_count = models.IntegerField()
-    counter = models.IntegerField()
+    task_count = models.IntegerField(
+        default=0
+    )
+    counter = models.IntegerField(
+        default=0
+    )
+
+    class Meta:
+        verbose_name = 'Гайд'
+        verbose_name_plural = 'Гайды'
+        ordering = ["ambassador"]
+
+    def __str__(self):
+        return f'Гайд {self.ambassador.name}'
 
 
 class MerchPhoto(models.Model):
@@ -238,3 +250,11 @@ class Content(models.Model):
         default=False,
         verbose_name='Контент в рамках гайда',
     )
+
+    class Meta:
+        verbose_name = 'Контент'
+        verbose_name_plural = 'Контент'
+        ordering = ["-created"]
+
+    def __str__(self):
+        return f'Контент {self.ambassador.name} на {self.platform.name}'
