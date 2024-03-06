@@ -1,18 +1,27 @@
 import re
 
+from django.utils.decorators import method_decorator
 from django_filters import rest_framework as rf_filters
+from drf_standardized_errors.openapi_serializers import (
+    ErrorResponse401Serializer,
+    ErrorResponse403Serializer,
+    ErrorResponse404Serializer,
+    ValidationErrorResponseSerializer,
+)
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
-from .filters import MerchApplicationsFilter
+from .filters import MerchApplicationsFilter, MerchFilter, PromocodeFilter
 from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
     MerchApplicationCreateUpdateSerializer,
     MerchApplicationSerializer,
     MerchCategorySerializer,
+    MerchCreateUpdateSerializer,
     MerchSerializer,
+    PromocodeCreateUpdateSerializer,
     PromocodeSerializer,
     YearBudgetSerializer,
 )
@@ -38,10 +47,7 @@ YEAR_MONTHS = [
 year = openapi.Parameter(
     "year",
     openapi.IN_QUERY,
-    description=(
-        "desired year, enter 4 digits in the format 1XXX or 2XXX "
-        "or you will receive 400 Bad request"
-    ),
+    description=("desired year, enter 4 digits in the format 1XXX or 2XXX"),
     type=openapi.TYPE_INTEGER,
 )
 ambassadors = openapi.Parameter(
@@ -49,24 +55,145 @@ ambassadors = openapi.Parameter(
     openapi.IN_QUERY,
     description=(
         "ambassadors whose annual budget we want to see; enter the ambassador ID, "
-        "you can enter several comma separated ambassador IDs"
+        "you can enter several comma-separated ambassador IDs"
     ),
     type=openapi.TYPE_ARRAY,
     items=openapi.Items(type=openapi.TYPE_INTEGER),
 )
 
 
-# TODO: enable ordering by merch cost, merch name,
-# ambassador (by name, clothing_size, shoe_size and address postal code)
-# TODO: add 4XX responses to Swagger api docs
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(
+        operation_summary="Get all merch applications",
+        responses={
+            200: MerchApplicationSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                "application_number",
+                openapi.IN_QUERY,
+                description="filtering by partial occurrence in application_number",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "ambassador",
+                openapi.IN_QUERY,
+                description="filtering by ambassador ID",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "tutor",
+                openapi.IN_QUERY,
+                description="filtering by tutor (curator) ID",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "start_date",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by merch application creation date, "
+                    "input examples: '2020-01-01', '2024-03-04T16:20:55'"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME,
+            ),
+            openapi.Parameter(
+                "end_date",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by merch application creation date, "
+                    "input examples: '2020-01-01', '2024-03-04T16:20:55'"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME,
+            ),
+            openapi.Parameter(
+                "merch",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by merch slug, accepts several comma-separated "
+                    "values, for example: ?merch=coffee-l,shopper-gray"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_SLUG,
+            ),
+        ],
+    ),
+)
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(
+        operation_summary="Get merch application by id",
+        responses={
+            200: MerchApplicationSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="create",
+    decorator=swagger_auto_schema(
+        operation_summary="Create merch application",
+        responses={
+            201: MerchApplicationCreateUpdateSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(
+        operation_summary="Edit merch application",
+        responses={
+            200: MerchApplicationCreateUpdateSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+            403: ErrorResponse403Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(
+        operation_summary="Delete merch application",
+        responses={
+            204: "",
+            401: ErrorResponse401Serializer,
+            403: ErrorResponse403Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="budget_info",
+    decorator=swagger_auto_schema(
+        operation_summary="Show the annual merch budget",
+        responses={200: YearBudgetSerializer, 401: ErrorResponse401Serializer},
+        manual_parameters=[year, ambassadors],
+    ),
+)
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for merch applications and annual merch budgets.
-    Basic merch appications ordering is carried out by ID.
-    You can order them by some other fields (by application_number, ambassador id,
-    tutor id, created) like this: ?ordering=ambassador (in the end of URL).
-    For reverse ordering insert a minus sign before the field name
-    like this: ?ordering=-ambassador
+    By default, sorting is done by ID.
+    You can also sort them by the following fields: ambassador__name,
+    ambassador__clothing_size, ambassador__shoe_size, ambassador__address__postal_code,
+    application_number, merch__name, 'tutor__first_name,tutor__last_name' (combined
+    curator's first and last names), created. Example: ?ordering=ambassador__name
+    (in the end of URL).
+    For reverse sorting insert a minus sign before the field name
+    like this: ?ordering=-ambassador__name (in the end of URL).
+
+    You can filter merch appications by application_number (by partial occurrence in
+    a string), ambassador (by ID), tutor (by ID), merch (by slug, can accept sevelal
+    comma-separated slugs), start_date and end_date (takes datetime string, examples:
+    "2020-01-01", "2024-03-04T16:20:55").
     """
 
     http_method_names = ["get", "post", "patch", "delete"]
@@ -75,6 +202,17 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsTutorOrReadOnly]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = MerchApplicationsFilter
+    ordering_fields = [
+        "ambassador__name",
+        "ambassador__clothing_size",
+        "ambassador__shoe_size",
+        "ambassador__address__postal_code",
+        "application_number",
+        "merch__name",
+        "tutor__first_name",
+        "tutor__last_name",
+        "created",
+    ]
     ordering = ["pk"]
 
     def get_queryset(self):
@@ -94,14 +232,12 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             tutor=self.request.user, application_number=generate_application_number()
         )
 
-    @swagger_auto_schema(manual_parameters=[year, ambassadors])
     @action(methods=["get"], detail=False, filter_backends=[])
     def budget_info(self, request):
         """
         Shows the annual merch budget with detailed information
         by months and ambassadors.
         You need to pass the required year to the query parameters like this: ?year=2023
-        Otherwise you will receive 400 Bad request.
 
         You can specify the IDs of particular ambassadors in the query parameters
         to view their annual budgets.
@@ -175,6 +311,58 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(
+        operation_summary="Get all merch categories",
+        responses={200: MerchCategorySerializer, 401: ErrorResponse401Serializer},
+    ),
+)
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(
+        operation_summary="Get merch category by id",
+        responses={
+            200: MerchCategorySerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="create",
+    decorator=swagger_auto_schema(
+        operation_summary="Create merch category",
+        responses={
+            201: MerchCategorySerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(
+        operation_summary="Edit merch category",
+        responses={
+            200: MerchCategorySerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(
+        operation_summary="Delete merch category",
+        responses={
+            204: "",
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
 class MerchCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for categories of merch."""
 
@@ -184,16 +372,109 @@ class MerchCategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-# TODO: make filtering by name, size, cost, category slug
-# TODO: add 4XX responses to Swagger api docs
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(
+        operation_summary="Get all merch species",
+        responses={
+            200: MerchSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                "name",
+                openapi.IN_QUERY,
+                description="filtering by partial occurrence in name",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "size",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by size (exact match), accepts several comma-separated "
+                    "values, for example: ?size=L,M"
+                ),
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "category",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by category slug, accepts several comma-separated "
+                    "values, for example: ?category=socks,shopper"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_SLUG,
+            ),
+            openapi.Parameter(
+                "min_cost",
+                openapi.IN_QUERY,
+                description="filtering by merch cost, including the entered value",
+                type=openapi.TYPE_NUMBER,
+            ),
+            openapi.Parameter(
+                "max_cost",
+                openapi.IN_QUERY,
+                description="filtering by merch cost, including the entered value",
+                type=openapi.TYPE_NUMBER,
+            ),
+        ],
+    ),
+)
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(
+        operation_summary="Get merch by id",
+        responses={
+            200: MerchSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="create",
+    decorator=swagger_auto_schema(
+        operation_summary="Create merch",
+        responses={
+            201: MerchCreateUpdateSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(
+        operation_summary="Edit merch",
+        responses={
+            200: MerchCreateUpdateSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(
+        operation_summary="Delete merch",
+        responses={
+            204: "",
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
 class MerchViewSet(viewsets.ModelViewSet):
     """
     ViewSet for merch species.
-    Basic items ordering is carried out by ID.
-    You can order objects by other fields (by name, size, slug, cost, and category id)
+    Basic items sorting is carried out by ID.
+    You can sort objects by other fields (by name, size, slug, cost, and category id)
     like this: ?ordering=cost (in the end of URL).
-    For reverse ordering insert a minus sign before the field name
-    like this: ?ordering=-cost
+    For reverse sorting insert a minus sign before the field name
+    like this: ?ordering=-cost (in the end of URL).
     """
 
     http_method_names = ["get", "post", "patch", "delete"]
@@ -201,26 +482,143 @@ class MerchViewSet(viewsets.ModelViewSet):
     serializer_class = MerchSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    # filterset_class =
+    filterset_class = MerchFilter
     ordering = ["pk"]
 
     def get_queryset(self):
         return MerchSerializer.setup_eager_loading(Merch.objects.all())
 
+    def get_serializer_class(self):
+        if self.action in ["create", "partial_update"]:
+            return MerchCreateUpdateSerializer
+        return MerchSerializer
 
-# TODO: make ordering by date (created field) and ambassador name
-# TODO: make filtering by different fields
-# TODO: add 4XX responses to Swagger api docs
+
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(
+        operation_summary="Get all promocodes",
+        responses={
+            200: PromocodeSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                "ambassador_name",
+                openapi.IN_QUERY,
+                description="filtering by partial occurrence in ambassador name",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "ambassador_status",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by ambassador status slug, accepts several "
+                    "comma-separated values, for example: "
+                    "?ambassador_status=active,paused"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_SLUG,
+            ),
+            openapi.Parameter(
+                "start_date",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by promocode creation date, "
+                    "input examples: '2020-01-01', '2024-03-04T16:20:55'"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME,
+            ),
+            openapi.Parameter(
+                "end_date",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by promocode creation date, "
+                    "input examples: '2020-01-01', '2024-03-04T16:20:55'"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME,
+            ),
+        ],
+    ),
+)
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(
+        operation_summary="Get promocode by id",
+        responses={
+            200: PromocodeSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="create",
+    decorator=swagger_auto_schema(
+        operation_summary="Create promocode",
+        responses={
+            201: PromocodeSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(
+        operation_summary="Edit promocode",
+        responses={
+            200: PromocodeSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(
+        operation_summary="Delete promocode",
+        responses={
+            204: "",
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
 class PromocodeViewSet(viewsets.ModelViewSet):
-    """ViewSet for promocodes."""
+    """
+    ViewSet for promocodes.
+    By default, sorting is done by ID.
+    You can also sort promocodes by the following fields: code, created,
+    ambassador__name, ambassador__status, ambassador__telegram_id.
+    Example: ?ordering=ambassador__name (in the end of URL).
+    For reverse sorting insert a minus sign before the field name
+    like this: ?ordering=-ambassador__name (in the end of URL).
+    """
 
     http_method_names = ["get", "post", "patch", "delete"]
     queryset = Promocode.objects.all()
     serializer_class = PromocodeSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    # filterset_class =
+    filterset_class = PromocodeFilter
+    ordering_fields = [
+        "code",
+        "created",
+        "ambassador__name",
+        "ambassador__status",
+        "ambassador__telegram_id",
+    ]
     ordering = ["pk"]
 
     def get_queryset(self):
         return PromocodeSerializer.setup_eager_loading(Promocode.objects.all())
+
+    def get_serializer_class(self):
+        if self.action in ["create", "partial_update"]:
+            return PromocodeCreateUpdateSerializer
+        return PromocodeSerializer

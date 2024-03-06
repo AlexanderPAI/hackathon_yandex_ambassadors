@@ -12,24 +12,47 @@ from promo.models import (
     MerchInApplication,
     Promocode,
 )
+from users.models import User
 
 
 class AddressMerchSerializer(serializers.ModelSerializer):
     """Serializer to display ambassador address in merch applications."""
 
+    postal_code = serializers.ReadOnlyField()
+    country = serializers.ReadOnlyField()
+    city = serializers.ReadOnlyField()
+    street = serializers.ReadOnlyField()
+
     class Meta:
         model = Address
-        fields = "__all__"
+        fields = ["id", "postal_code", "country", "city", "street"]
 
 
 class AmbassadorMerchSerializer(serializers.ModelSerializer):
     """Serializer to display ambassador details in merch applications."""
 
-    address = AddressMerchSerializer()
+    name = serializers.ReadOnlyField()
+    clothing_size = serializers.ReadOnlyField()
+    shoe_size = serializers.ReadOnlyField()
+    address = AddressMerchSerializer(read_only=True)
 
     class Meta:
         model = Ambassador
         fields = ["id", "name", "clothing_size", "shoe_size", "address"]
+
+
+class TutorMerchSerializer(serializers.ModelSerializer):
+    """Serializer to display tutor name in merch applications."""
+
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ["id", "full_name"]
+
+    def get_full_name(self, obj) -> str:
+        """Shows tutor full name."""
+        return str(obj)
 
 
 class StatusPromocodeSerializer(serializers.ModelSerializer):
@@ -60,20 +83,35 @@ class MerchInApplicationSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(source="merch.slug", read_only=True)
     size = serializers.ReadOnlyField(source="merch.size")
     cost = serializers.FloatField(source="merch.cost", read_only=True)
+    name_and_size = serializers.SerializerMethodField()
 
     class Meta:
         model = MerchInApplication
-        fields = ("id", "name", "category", "slug", "size", "cost", "quantity")
+        fields = (
+            "id",
+            "name",
+            "size",
+            "name_and_size",
+            "category",
+            "slug",
+            "cost",
+            "quantity",
+        )
+
+    def get_name_and_size(self, obj) -> str:
+        """Shows name and size combination."""
+        return str(obj.merch)
 
 
-class MerchInApplicationCreateUpdateSerializer(MerchInApplicationSerializer):
+class MerchInApplicationCreateUpdateSerializer(serializers.ModelSerializer):
     """Serializer to create/edit merch in an application."""
 
     id = serializers.PrimaryKeyRelatedField(
         source="merch.id", queryset=Merch.objects.all()
     )
 
-    class Meta(MerchInApplicationSerializer.Meta):
+    class Meta:
+        model = MerchInApplication
         fields = ("id", "quantity")
 
     def to_representation(self, instance):
@@ -93,9 +131,11 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
     """Serializer to display merch applications."""
 
     application_number = serializers.ReadOnlyField()
-    ambassador = AmbassadorMerchSerializer()
-    tutor = serializers.PrimaryKeyRelatedField(read_only=True)
-    merch = MerchInApplicationSerializer(many=True, source="merch_in_applications")
+    ambassador = AmbassadorMerchSerializer(read_only=True)
+    tutor = TutorMerchSerializer(read_only=True)
+    merch = MerchInApplicationSerializer(
+        many=True, source="merch_in_applications", read_only=True
+    )
     merch_cost = serializers.SerializerMethodField()
 
     class Meta:
@@ -114,7 +154,7 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
     def setup_eager_loading(cls, queryset):
         """Performs necessary eager loading of merch applications data."""
         return (
-            queryset.select_related("ambassador__address")
+            queryset.select_related("ambassador__address", "tutor")
             .prefetch_related(
                 Prefetch(
                     "merch_in_applications",
@@ -139,7 +179,7 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
 
 # TODO: drf-yasg shows incorrect merch field in response body - without taking into
 # account the MerchInApplicationCreateUpdateSerializer.to_representation method
-class MerchApplicationCreateUpdateSerializer(MerchApplicationSerializer):
+class MerchApplicationCreateUpdateSerializer(serializers.ModelSerializer):
     """Serializer to create/edit merch applications."""
 
     application_number = serializers.CharField(required=False)
@@ -148,6 +188,18 @@ class MerchApplicationCreateUpdateSerializer(MerchApplicationSerializer):
         many=True, source="merch_in_applications"
     )
     merch_cost = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MerchApplication
+        fields = (
+            "id",
+            "application_number",
+            "ambassador",
+            "tutor",
+            "created",
+            "merch_cost",
+            "merch",
+        )
 
     def get_merch_cost(self, obj) -> float:
         """Calculates the total cost of the merch in the application."""
@@ -220,7 +272,7 @@ class MerchCategorySerializer(serializers.ModelSerializer):
 
 
 class MerchSerializer(serializers.ModelSerializer):
-    """Serializer for merch species."""
+    """Serializer to display merch species."""
 
     category = MerchCategorySerializer()
 
@@ -234,8 +286,16 @@ class MerchSerializer(serializers.ModelSerializer):
         return queryset.select_related("category")
 
 
+class MerchCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer to create/edit merch species."""
+
+    class Meta:
+        model = Merch
+        fields = ["id", "name", "size", "slug", "cost", "category"]
+
+
 class PromocodeSerializer(serializers.ModelSerializer):
-    """Serializer for promocodes."""
+    """Serializer to display promocodes."""
 
     ambassador = AmbassadorPromocodeSerializer()
 
@@ -247,3 +307,11 @@ class PromocodeSerializer(serializers.ModelSerializer):
     def setup_eager_loading(cls, queryset):
         """Performs necessary eager loading of merch species data."""
         return queryset.select_related("ambassador__status")
+
+
+class PromocodeCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer to create/edit promocodes."""
+
+    class Meta:
+        model = Promocode
+        fields = ["id", "code", "created", "is_active", "ambassador"]

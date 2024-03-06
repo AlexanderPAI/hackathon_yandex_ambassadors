@@ -193,3 +193,16 @@ DJOSER = {
 QUERYCOUNT = {
     "DISPLAY_DUPLICATES": 3,  # how many duplicated queries to display (None or integer)
 }
+
+# CORS settings for frontend development
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_URLS_REGEX = r"^/api/.*$"
+
+# Security & sessions settings
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
