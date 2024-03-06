@@ -39,8 +39,8 @@ class MerchApplicationsFilter(rf_filters.FilterSet):
             "application_number",
             "ambassador",
             "tutor",
-            "start_date",  # example: "2024-01-01"
-            "end_date",  # example: "2024-01-01"
+            "start_date",
+            "end_date",
             "merch",
         ]
 
@@ -116,7 +116,6 @@ class PromocodeFilter(rf_filters.FilterSet):
         )
 
 
-# TODO: drf-yasg mistakenly considers the types of all fields to be strings
 class MerchFilter(rf_filters.FilterSet):
     """
     Class for filtering merch species.

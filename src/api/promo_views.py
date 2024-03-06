@@ -53,7 +53,7 @@ ambassadors = openapi.Parameter(
     openapi.IN_QUERY,
     description=(
         "ambassadors whose annual budget we want to see; enter the ambassador ID, "
-        "you can enter several comma separated ambassador IDs"
+        "you can enter several comma-separated ambassador IDs"
     ),
     type=openapi.TYPE_ARRAY,
     items=openapi.Items(type=openapi.TYPE_INTEGER),
@@ -73,7 +73,7 @@ ambassadors = openapi.Parameter(
             openapi.Parameter(
                 "application_number",
                 openapi.IN_QUERY,
-                description="filtering by by partial occurrence in application_number",
+                description="filtering by partial occurrence in application_number",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
@@ -111,11 +111,12 @@ ambassadors = openapi.Parameter(
             openapi.Parameter(
                 "merch",
                 openapi.IN_QUERY,
-                description="filtering by merch slug or slugs (comma-separated)",
-                type=openapi.TYPE_ARRAY,
-                items=openapi.Items(
-                    type=openapi.TYPE_STRING, format=openapi.FORMAT_SLUG
+                description=(
+                    "filtering by merch slug, accepts several comma-separated "
+                    "values, for example: ?merch=coffee-l,shopper-gray"
                 ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_SLUG,
             ),
         ],
     ),
@@ -308,7 +309,58 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# TODO: add 4XX responses to Swagger api docs
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(
+        operation_summary="Get all merch categories",
+        responses={200: MerchCategorySerializer, 401: ErrorResponse401Serializer},
+    ),
+)
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(
+        operation_summary="Get merch category by id",
+        responses={
+            200: MerchCategorySerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="create",
+    decorator=swagger_auto_schema(
+        operation_summary="Create merch category",
+        responses={
+            201: MerchCategorySerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(
+        operation_summary="Edit merch category",
+        responses={
+            200: MerchCategorySerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(
+        operation_summary="Delete merch category",
+        responses={
+            204: "",
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
 class MerchCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for categories of merch."""
 
@@ -318,7 +370,101 @@ class MerchCategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-# TODO: add 4XX responses to Swagger api docs
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(
+        operation_summary="Get all merch species",
+        responses={
+            200: MerchSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                "name",
+                openapi.IN_QUERY,
+                description="filtering by partial occurrence in name",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "size",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by size (exact match), accepts several comma-separated "
+                    "values, for example: ?size=L,M"
+                ),
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "category",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by category slug, accepts several comma-separated "
+                    "values, for example: ?category=socks,shopper"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_SLUG,
+            ),
+            openapi.Parameter(
+                "min_cost",
+                openapi.IN_QUERY,
+                description="filtering by merch cost, including the entered value",
+                type=openapi.TYPE_NUMBER,
+            ),
+            openapi.Parameter(
+                "max_cost",
+                openapi.IN_QUERY,
+                description="filtering by merch cost, including the entered value",
+                type=openapi.TYPE_NUMBER,
+            ),
+        ],
+    ),
+)
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(
+        operation_summary="Get merch by id",
+        responses={
+            200: MerchSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="create",
+    decorator=swagger_auto_schema(
+        operation_summary="Create merch",
+        responses={
+            201: MerchSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(
+        operation_summary="Edit merch",
+        responses={
+            200: MerchSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(
+        operation_summary="Delete merch",
+        responses={
+            204: "",
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
 class MerchViewSet(viewsets.ModelViewSet):
     """
     ViewSet for merch species.
