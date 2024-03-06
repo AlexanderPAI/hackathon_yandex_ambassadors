@@ -4,6 +4,7 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
+from .ambassadors_views import AmbassadorViewSet
 from .promo_views import (
     MerchApplicationViewSet,
     MerchCategoryViewSet,
@@ -11,7 +12,6 @@ from .promo_views import (
     PromocodeViewSet,
 )
 from .user_actions_views import UserActionsViewSet
-
 from api.content_views import GuideViewSet, GuideKitViewSet, GuideTaskViewSet
 
 app_name = "api"
@@ -21,6 +21,7 @@ router = DefaultRouter()
 router.register("merch_category", MerchCategoryViewSet)
 router.register("merch_price", MerchViewSet)
 router.register("send_merch", MerchApplicationViewSet)
+router.register("ambassadors", AmbassadorViewSet)
 router.register("promocodes", PromocodeViewSet)
 router.register("edit_history", UserActionsViewSet)
 router.register("guides", GuideViewSet)
