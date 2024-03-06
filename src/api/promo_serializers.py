@@ -4,7 +4,51 @@ from django.db import transaction
 from django.db.models import F, Prefetch, Sum
 from rest_framework import serializers
 
-from promo.models import Merch, MerchApplication, MerchInApplication
+from ambassadors.models import Address, Ambassador, Status
+from promo.models import (
+    Merch,
+    MerchApplication,
+    MerchCategory,
+    MerchInApplication,
+    Promocode,
+)
+
+
+class AddressMerchSerializer(serializers.ModelSerializer):
+    """Serializer to display ambassador address in merch applications."""
+
+    class Meta:
+        model = Address
+        fields = "__all__"
+
+
+class AmbassadorMerchSerializer(serializers.ModelSerializer):
+    """Serializer to display ambassador details in merch applications."""
+
+    address = AddressMerchSerializer()
+
+    class Meta:
+        model = Ambassador
+        fields = ["id", "name", "clothing_size", "shoe_size", "address"]
+
+
+class StatusPromocodeSerializer(serializers.ModelSerializer):
+    """Serializer to display ambassador status in promocodes serializer."""
+
+    class Meta:
+        model = Status
+        fields = ["id", "name", "slug"]
+
+
+class AmbassadorPromocodeSerializer(serializers.ModelSerializer):
+    """Serializer to display ambassador details in promocodes serializer."""
+
+    telegram = serializers.CharField(source="telegram_id")
+    status = StatusPromocodeSerializer()
+
+    class Meta:
+        model = Ambassador
+        fields = ["id", "name", "status", "created", "telegram"]
 
 
 class MerchInApplicationSerializer(serializers.ModelSerializer):
@@ -49,6 +93,7 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
     """Serializer to display merch applications."""
 
     application_number = serializers.ReadOnlyField()
+    ambassador = AmbassadorMerchSerializer()
     tutor = serializers.PrimaryKeyRelatedField(read_only=True)
     merch = MerchInApplicationSerializer(many=True, source="merch_in_applications")
     merch_cost = serializers.SerializerMethodField()
@@ -68,17 +113,23 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
     @classmethod
     def setup_eager_loading(cls, queryset):
         """Performs necessary eager loading of merch applications data."""
-        return queryset.prefetch_related(
-            Prefetch(
-                "merch_in_applications",
-                queryset=MerchInApplication.objects.select_related("merch"),
+        return (
+            queryset.select_related("ambassador__address")
+            .prefetch_related(
+                Prefetch(
+                    "merch_in_applications",
+                    queryset=MerchInApplication.objects.select_related(
+                        "merch__category"
+                    ),
+                )
             )
-        ).annotate(
-            merch_cost=Sum(
-                F("merch_in_applications__quantity")
-                * F("merch_in_applications__merch__cost"),
-                default=0,
-            ),
+            .annotate(
+                merch_cost=Sum(
+                    F("merch_in_applications__quantity")
+                    * F("merch_in_applications__merch__cost"),
+                    default=0,
+                ),
+            )
         )
 
     def get_merch_cost(self, obj) -> float:
@@ -158,3 +209,41 @@ class YearBudgetSerializer(serializers.Serializer):
     year_total = serializers.FloatField()
     months = MonthBudgetSerializer(many=True)
     ambassadors = AmbassadorBudgetSerializer(many=True)
+
+
+class MerchCategorySerializer(serializers.ModelSerializer):
+    """Serializer for categories of merch."""
+
+    class Meta:
+        model = MerchCategory
+        fields = ["id", "name", "slug"]
+
+
+class MerchSerializer(serializers.ModelSerializer):
+    """Serializer for merch species."""
+
+    category = MerchCategorySerializer()
+
+    class Meta:
+        model = Merch
+        fields = ["id", "name", "size", "slug", "cost", "category"]
+
+    @classmethod
+    def setup_eager_loading(cls, queryset):
+        """Performs necessary eager loading of merch species data."""
+        return queryset.select_related("category")
+
+
+class PromocodeSerializer(serializers.ModelSerializer):
+    """Serializer for promocodes."""
+
+    ambassador = AmbassadorPromocodeSerializer()
+
+    class Meta:
+        model = Promocode
+        fields = ["id", "code", "created", "is_active", "ambassador"]
+
+    @classmethod
+    def setup_eager_loading(cls, queryset):
+        """Performs necessary eager loading of merch species data."""
+        return queryset.select_related("ambassador__status")

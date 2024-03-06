@@ -11,11 +11,14 @@ from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
     MerchApplicationCreateUpdateSerializer,
     MerchApplicationSerializer,
+    MerchCategorySerializer,
+    MerchSerializer,
+    PromocodeSerializer,
     YearBudgetSerializer,
 )
 from .utils import generate_application_number
 from ambassadors.models import Ambassador
-from promo.models import MerchApplication
+from promo.models import Merch, MerchApplication, MerchCategory, Promocode
 
 YEAR_MONTHS = [
     ("january", 1),
@@ -41,11 +44,30 @@ year = openapi.Parameter(
     ),
     type=openapi.TYPE_INTEGER,
 )
+ambassadors = openapi.Parameter(
+    "ambassadors",
+    openapi.IN_QUERY,
+    description=(
+        "ambassadors whose annual budget we want to see; enter the ambassador ID, "
+        "you can enter several comma separated ambassador IDs"
+    ),
+    type=openapi.TYPE_ARRAY,
+    items=openapi.Items(type=openapi.TYPE_INTEGER),
+)
 
 
+# TODO: enable ordering by merch cost, merch name,
+# ambassador (by name, clothing_size, shoe_size and address postal code)
 # TODO: add 4XX responses to Swagger api docs
 class MerchApplicationViewSet(viewsets.ModelViewSet):
-    """ViewSet for merch applications and annual merch budgets."""
+    """
+    ViewSet for merch applications and annual merch budgets.
+    Basic merch appications ordering is carried out by ID.
+    You can order them by some other fields (by application_number, ambassador id,
+    tutor id, created) like this: ?ordering=ambassador (in the end of URL).
+    For reverse ordering insert a minus sign before the field name
+    like this: ?ordering=-ambassador
+    """
 
     http_method_names = ["get", "post", "patch", "delete"]
     queryset = MerchApplication.objects.all()
@@ -61,7 +83,7 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
         )
 
     def get_serializer_class(self):
-        if self.action == "year_budget":
+        if self.action == "budget_info":
             return YearBudgetSerializer
         if self.action in ["create", "partial_update"]:
             return MerchApplicationCreateUpdateSerializer
@@ -72,40 +94,57 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             tutor=self.request.user, application_number=generate_application_number()
         )
 
-    @swagger_auto_schema(manual_parameters=[year])
-    @action(methods=["get"], detail=False)
-    def year_budget(self, request):
+    @swagger_auto_schema(manual_parameters=[year, ambassadors])
+    @action(methods=["get"], detail=False, filter_backends=[])
+    def budget_info(self, request):
         """
         Shows the annual merch budget with detailed information
         by months and ambassadors.
-        You need to pass the required year to the parameters like this: ?year=2023
+        You need to pass the required year to the query parameters like this: ?year=2023
         Otherwise you will receive 400 Bad request.
+
+        You can specify the IDs of particular ambassadors in the query parameters
+        to view their annual budgets.
+        You can specify several comma-separated ambassador IDs like this:
+        ?year=2023&ambassadors=1,2
         """
         year_param = self.request.query_params.get("year", "")
         year = year_param if re.match(r"[1-2][0-9]{3}", year_param) else None
-        year_qs = self.get_queryset().filter(created__year=year)
-        year_total = sum([application.merch_cost for application in year_qs])
+        ambassadors_ids = self.request.query_params.get("ambassadors")
+        ambassadors = (
+            Ambassador.objects.filter(id__in=ambassadors_ids.split(","))
+            if ambassadors_ids
+            else Ambassador.objects.all()
+        )
+        year_qs = (
+            self.get_queryset().filter(created__year=year, ambassador__in=ambassadors)
+            if ambassadors_ids
+            else self.get_queryset().filter(created__year=year)
+        )
+        year_list = [application for application in year_qs]
+        year_total = sum([application.merch_cost for application in year_list])
         if year_total == 0:
             return response.Response([], status=status.HTTP_200_OK)
 
         months = []
         for month in YEAR_MONTHS:
-            month_qs = year_qs.filter(created__month=month[1])
-            month_total = sum([application.merch_cost for application in month_qs])
+            month_list = [app for app in year_list if app.created.month == month[1]]
+            month_total = sum([application.merch_cost for application in month_list])
             months.append({"month": month[0], "month_total": month_total})
 
-        ambassadors = Ambassador.objects.all()
         ambassadors_budgets = []
         for person in ambassadors:
-            ambassador_qs = year_qs.filter(ambassador=person)
+            ambassador_list = [app for app in year_list if app.ambassador == person]
             ambassador_year_total = sum(
-                [application.merch_cost for application in ambassador_qs]
+                [application.merch_cost for application in ambassador_list]
             )
             ambassador_months_budgets = []
             for month in YEAR_MONTHS:
-                ambassador_month_qs = ambassador_qs.filter(created__month=month[1])
+                ambassador_month_list = [
+                    app for app in ambassador_list if app.created.month == month[1]
+                ]
                 ambassador_month_total = sum(
-                    [application.merch_cost for application in ambassador_month_qs]
+                    [application.merch_cost for application in ambassador_month_list]
                 )
                 ambassador_months_budgets.append(
                     {"month": month[0], "month_total": ambassador_month_total}
@@ -134,3 +173,54 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST
             )
         return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MerchCategoryViewSet(viewsets.ModelViewSet):
+    """ViewSet for categories of merch."""
+
+    http_method_names = ["get", "post", "patch", "delete"]
+    queryset = MerchCategory.objects.all()
+    serializer_class = MerchCategorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+# TODO: make filtering by name, size, cost, category slug
+# TODO: add 4XX responses to Swagger api docs
+class MerchViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for merch species.
+    Basic items ordering is carried out by ID.
+    You can order objects by other fields (by name, size, slug, cost, and category id)
+    like this: ?ordering=cost (in the end of URL).
+    For reverse ordering insert a minus sign before the field name
+    like this: ?ordering=-cost
+    """
+
+    http_method_names = ["get", "post", "patch", "delete"]
+    queryset = Merch.objects.all()
+    serializer_class = MerchSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
+    # filterset_class =
+    ordering = ["pk"]
+
+    def get_queryset(self):
+        return MerchSerializer.setup_eager_loading(Merch.objects.all())
+
+
+# TODO: make ordering by date (created field) and ambassador name
+# TODO: make filtering by different fields
+# TODO: add 4XX responses to Swagger api docs
+class PromocodeViewSet(viewsets.ModelViewSet):
+    """ViewSet for promocodes."""
+
+    http_method_names = ["get", "post", "patch", "delete"]
+    queryset = Promocode.objects.all()
+    serializer_class = PromocodeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
+    # filterset_class =
+    ordering = ["pk"]
+
+    def get_queryset(self):
+        return PromocodeSerializer.setup_eager_loading(Promocode.objects.all())

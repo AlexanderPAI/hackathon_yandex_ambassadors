@@ -18,6 +18,10 @@ class AmbassadorAdmin(admin.ModelAdmin):
     list_filter = ("program", "status")
     ordering = ("-created",)
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.select_related("status", "program")
+
 
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
