@@ -1,7 +1,7 @@
 from django.db.models import BooleanField, ExpressionWrapper, Q
 from django_filters import rest_framework as rf_filters
 
-from promo.models import MerchApplication, Promocode
+from promo.models import Merch, MerchApplication, Promocode
 
 
 class CharFilterInFilter(rf_filters.BaseInFilter, rf_filters.CharFilter):
@@ -20,11 +20,11 @@ class MerchApplicationsFilter(rf_filters.FilterSet):
 
     Filters for fields 'ambassador', 'tutor' work by ID.
     The filter for the 'merch' field works by slug and accepts several comma-separated
-    values, for example: ?merch=coffee-l%2Cshopper-gray (in the end of URL).
+    values, for example: ?merch=coffee-l,shopper-gray (in the end of URL).
 
     Filters 'start_date' and 'end_date' take datetime string
     (input examples: "2020-01-01", "2024-03-04T16:20:55") as input and compare it
-    with the value of the 'created' field of each merch application.
+    to the value of the 'created' field of each merch application.
     """
 
     application_number = rf_filters.CharFilter(
@@ -70,18 +70,18 @@ class MerchApplicationsFilter(rf_filters.FilterSet):
 # TODO: drf-yasg mistakenly considers the types of all fields to be strings
 class PromocodeFilter(rf_filters.FilterSet):
     """
-    Class for filtering merch applications.
+    Class for filtering promocodes.
 
     The filter for the 'ambassador_name' works on a partial occurrence
     (istartswith and icontains).
 
     The filter for the 'ambassador_status' works by slug and accepts several
-    comma-separated values, for example: ?ambassador_status=active%2Cpaused (in the end
+    comma-separated values, for example: ?ambassador_status=active,paused (in the end
     of URL).
 
     Filters 'start_date' and 'end_date' take datetime string
     (input examples: "2020-01-01", "2024-03-04T16:20:55") as input and compare it
-    with the value of the 'created' field of each merch application.
+    to the value of the 'created' field of each merch application.
     """
 
     ambassador_name = rf_filters.CharFilter(
@@ -115,3 +115,66 @@ class PromocodeFilter(rf_filters.FilterSet):
             )
             .order_by("-is_start")
         )
+
+
+# TODO: drf-yasg mistakenly considers the types of all fields to be strings
+class MerchFilter(rf_filters.FilterSet):
+    """
+    Class for filtering merch species.
+
+    The filter for the 'name' works on a partial occurrence (istartswith and icontains).
+
+    The filter for the 'size' works by exact match and accepts several comma-separated
+    values, for example: ?size=L,M (in the end of URL).
+
+    The filter for the 'category' works by slug and accepts several comma-separated
+    values, for example: ?category=socks,shopper (in the end of URL).
+
+    Filters 'min_cost' and 'max_cost' take integer or float number as input and compare
+    it to the value of the 'cost' field of each merch item. The results include
+    the entered value.
+    """
+
+    name = rf_filters.CharFilter(method="startswith_contains_union_method")
+    size = CharFilterInFilter()
+    category = CharFilterInFilter(field_name="category__slug")
+    min_cost = rf_filters.NumberFilter(method="get_min_cost")
+    max_cost = rf_filters.NumberFilter(method="get_max_cost")
+
+    class Meta:
+        model = Merch
+        fields = ["name", "size", "category", "min_cost", "max_cost"]
+
+    def startswith_contains_union_method(self, queryset, name, value):
+        """
+        When using sqlite DB, filtering will be case-sensitive;
+        when using PostgreSQL DB, filtering will be case-insensitive as it should be.
+        """
+        if not bool(value):
+            return queryset
+        return (
+            queryset.filter(Q(name__istartswith=value) | Q(name__icontains=value))
+            .annotate(
+                is_start=ExpressionWrapper(
+                    Q(name__istartswith=value),
+                    output_field=BooleanField(),
+                )
+            )
+            .order_by("-is_start")
+        )
+
+    def get_min_cost(self, queryset, name, value):
+        if value <= 0:
+            return queryset
+        merch_ids = [obj.pk for obj in queryset if obj.cost >= value]
+        if merch_ids:
+            return queryset.filter(pk__in=merch_ids)
+        return queryset.none()
+
+    def get_max_cost(self, queryset, name, value):
+        if value <= 0:
+            return queryset
+        merch_ids = [obj.pk for obj in queryset if obj.cost <= value]
+        if merch_ids:
+            return queryset.filter(pk__in=merch_ids)
+        return queryset.none()

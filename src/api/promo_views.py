@@ -6,7 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
-from .filters import MerchApplicationsFilter, PromocodeFilter
+from .filters import MerchApplicationsFilter, MerchFilter, PromocodeFilter
 from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
     MerchApplicationCreateUpdateSerializer,
@@ -201,7 +201,6 @@ class MerchCategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-# TODO: make filtering by name, size, cost, category slug
 # TODO: add 4XX responses to Swagger api docs
 class MerchViewSet(viewsets.ModelViewSet):
     """
@@ -218,7 +217,7 @@ class MerchViewSet(viewsets.ModelViewSet):
     serializer_class = MerchSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    # filterset_class =
+    filterset_class = MerchFilter
     ordering = ["pk"]
 
     def get_queryset(self):

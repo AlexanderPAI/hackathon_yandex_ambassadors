@@ -171,3 +171,6 @@ static/
 
 # VSCode
 .vscode
+
+# Other json files
+*.json
