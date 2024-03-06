@@ -53,6 +53,11 @@ ambassadors = openapi.Parameter(
 )
 
 
+# TODO: make endpoint "budget-price" to see/edit/delete merch items (not applications),
+# mandatory fields - id, name+size, cost,
+# for the page - https://delightful-bublanina-904784.netlify.app/budget-price
+# TODO: make provocodes endpoint (see/edit/delete) for
+# this page https://delightful-bublanina-904784.netlify.app/promocodes
 # TODO: add 4XX responses to Swagger api docs
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """ViewSet for merch applications and annual merch budgets."""
@@ -71,7 +76,7 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
         )
 
     def get_serializer_class(self):
-        if self.action == "year_budget":
+        if self.action == "budget_info":
             return YearBudgetSerializer
         if self.action in ["create", "partial_update"]:
             return MerchApplicationCreateUpdateSerializer
@@ -84,7 +89,7 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(manual_parameters=[year, ambassadors])
     @action(methods=["get"], detail=False, filter_backends=[])
-    def year_budget(self, request):
+    def budget_info(self, request):
         """
         Shows the annual merch budget with detailed information
         by months and ambassadors.

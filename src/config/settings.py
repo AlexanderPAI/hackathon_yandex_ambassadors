@@ -16,8 +16,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 
+MODE = os.getenv("MODE", default="prod")
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if MODE == "dev":
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -25,7 +30,8 @@ ALLOWED_HOSTS = []
 AUTH_USER_MODEL = "users.User"
 
 # For django-debug-toolbar
-INTERNAL_IPS = ["127.0.0.1"]
+if MODE == "dev":
+    INTERNAL_IPS = ["127.0.0.1"]
 
 
 # Application definition

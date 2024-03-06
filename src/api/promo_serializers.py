@@ -4,7 +4,26 @@ from django.db import transaction
 from django.db.models import F, Prefetch, Sum
 from rest_framework import serializers
 
+from ambassadors.models import Address, Ambassador
 from promo.models import Merch, MerchApplication, MerchInApplication
+
+
+class AddressMerchSerializer(serializers.ModelSerializer):
+    """Serializer to display ambassador address in merch applications."""
+
+    class Meta:
+        model = Address
+        fields = "__all__"
+
+
+class AmbassadorMerchSerializer(serializers.ModelSerializer):
+    """Serializer to display ambassador details in merch applications."""
+
+    address = AddressMerchSerializer()
+
+    class Meta:
+        model = Ambassador
+        fields = ["name", "clothing_size", "shoe_size", "address"]
 
 
 class MerchInApplicationSerializer(serializers.ModelSerializer):
@@ -49,6 +68,7 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
     """Serializer to display merch applications."""
 
     application_number = serializers.ReadOnlyField()
+    ambassador = AmbassadorMerchSerializer()
     tutor = serializers.PrimaryKeyRelatedField(read_only=True)
     merch = MerchInApplicationSerializer(many=True, source="merch_in_applications")
     merch_cost = serializers.SerializerMethodField()
@@ -69,7 +89,7 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
     def setup_eager_loading(cls, queryset):
         """Performs necessary eager loading of merch applications data."""
         return (
-            queryset.select_related("ambassador")
+            queryset.select_related("ambassador__address")
             .prefetch_related(
                 Prefetch(
                     "merch_in_applications",
