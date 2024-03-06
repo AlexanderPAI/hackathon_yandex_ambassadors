@@ -10,7 +10,6 @@ class CharFilterInFilter(rf_filters.BaseInFilter, rf_filters.CharFilter):
     pass
 
 
-# TODO: drf-yasg mistakenly considers the types of all fields to be strings
 class MerchApplicationsFilter(rf_filters.FilterSet):
     """
     Class for filtering merch applications.

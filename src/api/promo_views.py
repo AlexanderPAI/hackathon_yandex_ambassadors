@@ -1,6 +1,13 @@
 import re
 
+from django.utils.decorators import method_decorator
 from django_filters import rest_framework as rf_filters
+from drf_standardized_errors.openapi_serializers import (
+    ErrorResponse401Serializer,
+    ErrorResponse403Serializer,
+    ErrorResponse404Serializer,
+    ValidationErrorResponseSerializer,
+)
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, response, status, viewsets
@@ -38,10 +45,7 @@ YEAR_MONTHS = [
 year = openapi.Parameter(
     "year",
     openapi.IN_QUERY,
-    description=(
-        "desired year, enter 4 digits in the format 1XXX or 2XXX "
-        "or you will receive 400 Bad request"
-    ),
+    description=("desired year, enter 4 digits in the format 1XXX or 2XXX"),
     type=openapi.TYPE_INTEGER,
 )
 ambassadors = openapi.Parameter(
@@ -56,7 +60,121 @@ ambassadors = openapi.Parameter(
 )
 
 
-# TODO: add 4XX responses to Swagger api docs
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(
+        operation_summary="Get all merch applications",
+        responses={
+            200: MerchApplicationSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                "application_number",
+                openapi.IN_QUERY,
+                description="filtering by by partial occurrence in application_number",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "ambassador",
+                openapi.IN_QUERY,
+                description="filtering by ambassador ID",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "tutor",
+                openapi.IN_QUERY,
+                description="filtering by tutor (curator) ID",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "start_date",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by merch application creation date, "
+                    "input examples: '2020-01-01', '2024-03-04T16:20:55'"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME,
+            ),
+            openapi.Parameter(
+                "end_date",
+                openapi.IN_QUERY,
+                description=(
+                    "filtering by merch application creation date, "
+                    "input examples: '2020-01-01', '2024-03-04T16:20:55'"
+                ),
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME,
+            ),
+            openapi.Parameter(
+                "merch",
+                openapi.IN_QUERY,
+                description="filtering by merch slug or slugs (comma-separated)",
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(
+                    type=openapi.TYPE_STRING, format=openapi.FORMAT_SLUG
+                ),
+            ),
+        ],
+    ),
+)
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(
+        operation_summary="Get merch application by id",
+        responses={
+            200: MerchApplicationSerializer,
+            401: ErrorResponse401Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="create",
+    decorator=swagger_auto_schema(
+        operation_summary="Create merch application",
+        responses={
+            201: MerchApplicationCreateUpdateSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(
+        operation_summary="Edit merch application",
+        responses={
+            200: MerchApplicationCreateUpdateSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+            403: ErrorResponse403Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(
+        operation_summary="Delete merch application",
+        responses={
+            204: "",
+            401: ErrorResponse401Serializer,
+            403: ErrorResponse403Serializer,
+            404: ErrorResponse404Serializer,
+        },
+    ),
+)
+@method_decorator(
+    name="budget_info",
+    decorator=swagger_auto_schema(
+        operation_summary="Show the annual merch budget",
+        responses={200: YearBudgetSerializer, 401: ErrorResponse401Serializer},
+        manual_parameters=[year, ambassadors],
+    ),
+)
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for merch applications and annual merch budgets.
@@ -111,14 +229,12 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
             tutor=self.request.user, application_number=generate_application_number()
         )
 
-    @swagger_auto_schema(manual_parameters=[year, ambassadors])
     @action(methods=["get"], detail=False, filter_backends=[])
     def budget_info(self, request):
         """
         Shows the annual merch budget with detailed information
         by months and ambassadors.
         You need to pass the required year to the query parameters like this: ?year=2023
-        Otherwise you will receive 400 Bad request.
 
         You can specify the IDs of particular ambassadors in the query parameters
         to view their annual budgets.
@@ -192,6 +308,7 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
 
+# TODO: add 4XX responses to Swagger api docs
 class MerchCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for categories of merch."""
 

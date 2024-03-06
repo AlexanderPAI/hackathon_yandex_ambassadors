@@ -18,15 +18,23 @@ from users.models import User
 class AddressMerchSerializer(serializers.ModelSerializer):
     """Serializer to display ambassador address in merch applications."""
 
+    postal_code = serializers.ReadOnlyField()
+    country = serializers.ReadOnlyField()
+    city = serializers.ReadOnlyField()
+    street = serializers.ReadOnlyField()
+
     class Meta:
         model = Address
-        fields = "__all__"
+        fields = ["id", "postal_code", "country", "city", "street"]
 
 
 class AmbassadorMerchSerializer(serializers.ModelSerializer):
     """Serializer to display ambassador details in merch applications."""
 
-    address = AddressMerchSerializer()
+    name = serializers.ReadOnlyField()
+    clothing_size = serializers.ReadOnlyField()
+    shoe_size = serializers.ReadOnlyField()
+    address = AddressMerchSerializer(read_only=True)
 
     class Meta:
         model = Ambassador
@@ -95,14 +103,15 @@ class MerchInApplicationSerializer(serializers.ModelSerializer):
         return str(obj.merch)
 
 
-class MerchInApplicationCreateUpdateSerializer(MerchInApplicationSerializer):
+class MerchInApplicationCreateUpdateSerializer(serializers.ModelSerializer):
     """Serializer to create/edit merch in an application."""
 
     id = serializers.PrimaryKeyRelatedField(
         source="merch.id", queryset=Merch.objects.all()
     )
 
-    class Meta(MerchInApplicationSerializer.Meta):
+    class Meta:
+        model = MerchInApplication
         fields = ("id", "quantity")
 
     def to_representation(self, instance):
@@ -122,9 +131,11 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
     """Serializer to display merch applications."""
 
     application_number = serializers.ReadOnlyField()
-    ambassador = AmbassadorMerchSerializer()
-    tutor = TutorMerchSerializer()
-    merch = MerchInApplicationSerializer(many=True, source="merch_in_applications")
+    ambassador = AmbassadorMerchSerializer(read_only=True)
+    tutor = TutorMerchSerializer(read_only=True)
+    merch = MerchInApplicationSerializer(
+        many=True, source="merch_in_applications", read_only=True
+    )
     merch_cost = serializers.SerializerMethodField()
 
     class Meta:
@@ -168,7 +179,7 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
 
 # TODO: drf-yasg shows incorrect merch field in response body - without taking into
 # account the MerchInApplicationCreateUpdateSerializer.to_representation method
-class MerchApplicationCreateUpdateSerializer(MerchApplicationSerializer):
+class MerchApplicationCreateUpdateSerializer(serializers.ModelSerializer):
     """Serializer to create/edit merch applications."""
 
     application_number = serializers.CharField(required=False)
@@ -177,6 +188,18 @@ class MerchApplicationCreateUpdateSerializer(MerchApplicationSerializer):
         many=True, source="merch_in_applications"
     )
     merch_cost = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MerchApplication
+        fields = (
+            "id",
+            "application_number",
+            "ambassador",
+            "tutor",
+            "created",
+            "merch_cost",
+            "merch",
+        )
 
     def get_merch_cost(self, obj) -> float:
         """Calculates the total cost of the merch in the application."""
