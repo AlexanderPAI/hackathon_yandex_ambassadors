@@ -39,3 +39,33 @@ loaddb:
 
 collectstatic:
 	cd src; python3 manage.py collectstatic --no-input
+
+up-compose:
+	sudo docker compose -f docker-compose.local.yml up -d
+
+build-compose:
+	sudo docker compose -f docker-compose.local.yml up -d --build
+
+stop-compose:
+	sudo docker compose -f docker-compose.local.yml stop
+
+start-compose:
+	sudo docker compose -f docker-compose.local.yml start
+
+makemig-compose:
+	sudo docker compose -f docker-compose.local.yml exec -it backend python manage.py makemigrations
+
+migrate-compose:
+	sudo docker compose -f docker-compose.local.yml exec -it backend python manage.py migrate
+
+superuser-compose:
+	sudo docker compose -f docker-compose.local.yml exec -it backend python manage.py createsuperuser --email test@test.com --username admin -v 3
+
+collectstatic-compose:
+	sudo docker compose -f docker-compose.local.yml exec -it backend python manage.py collectstatic --no-input
+
+shell-compose:
+	sudo docker compose -f docker-compose.local.yml exec -it backend python manage.py shell
+
+ls-compose:
+	sudo docker compose -f docker-compose.local.yml exec -it backend ls

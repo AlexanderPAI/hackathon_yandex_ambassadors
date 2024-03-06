@@ -1,0 +1,7 @@
+__pycache__/
+db.sqlite3
+token.json
+credentials.json
+dump.json
+/src/static/
+.env
