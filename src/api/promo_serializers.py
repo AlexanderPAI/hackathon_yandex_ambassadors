@@ -4,8 +4,14 @@ from django.db import transaction
 from django.db.models import F, Prefetch, Sum
 from rest_framework import serializers
 
-from ambassadors.models import Address, Ambassador
-from promo.models import Merch, MerchApplication, MerchCategory, MerchInApplication
+from ambassadors.models import Address, Ambassador, Status
+from promo.models import (
+    Merch,
+    MerchApplication,
+    MerchCategory,
+    MerchInApplication,
+    Promocode,
+)
 
 
 class AddressMerchSerializer(serializers.ModelSerializer):
@@ -23,7 +29,26 @@ class AmbassadorMerchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ambassador
-        fields = ["name", "clothing_size", "shoe_size", "address"]
+        fields = ["id", "name", "clothing_size", "shoe_size", "address"]
+
+
+class StatusPromocodeSerializer(serializers.ModelSerializer):
+    """Serializer to display ambassador status in promocodes serializer."""
+
+    class Meta:
+        model = Status
+        fields = ["id", "name", "slug"]
+
+
+class AmbassadorPromocodeSerializer(serializers.ModelSerializer):
+    """Serializer to display ambassador details in promocodes serializer."""
+
+    telegram = serializers.CharField(source="telegram_id")
+    status = StatusPromocodeSerializer()
+
+    class Meta:
+        model = Ambassador
+        fields = ["id", "name", "status", "created", "telegram"]
 
 
 class MerchInApplicationSerializer(serializers.ModelSerializer):
@@ -207,3 +232,18 @@ class MerchSerializer(serializers.ModelSerializer):
     def setup_eager_loading(cls, queryset):
         """Performs necessary eager loading of merch species data."""
         return queryset.select_related("category")
+
+
+class PromocodeSerializer(serializers.ModelSerializer):
+    """Serializer for promocodes."""
+
+    ambassador = AmbassadorPromocodeSerializer()
+
+    class Meta:
+        model = Promocode
+        fields = ["id", "code", "created", "is_active", "ambassador"]
+
+    @classmethod
+    def setup_eager_loading(cls, queryset):
+        """Performs necessary eager loading of merch species data."""
+        return queryset.select_related("ambassador__status")

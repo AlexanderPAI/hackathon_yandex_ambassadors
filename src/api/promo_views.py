@@ -13,11 +13,12 @@ from .promo_serializers import (
     MerchApplicationSerializer,
     MerchCategorySerializer,
     MerchSerializer,
+    PromocodeSerializer,
     YearBudgetSerializer,
 )
 from .utils import generate_application_number
 from ambassadors.models import Ambassador
-from promo.models import Merch, MerchApplication, MerchCategory
+from promo.models import Merch, MerchApplication, MerchCategory, Promocode
 
 YEAR_MONTHS = [
     ("january", 1),
@@ -55,11 +56,18 @@ ambassadors = openapi.Parameter(
 )
 
 
-# TODO: make provocodes endpoint (see/edit/delete) for
-# this page https://delightful-bublanina-904784.netlify.app/promocodes
+# TODO: enable ordering by merch cost, merch name,
+# ambassador (by name, clothing_size, shoe_size and address postal code)
 # TODO: add 4XX responses to Swagger api docs
 class MerchApplicationViewSet(viewsets.ModelViewSet):
-    """ViewSet for merch applications and annual merch budgets."""
+    """
+    ViewSet for merch applications and annual merch budgets.
+    Basic merch appications ordering is carried out by ID.
+    You can order them by some other fields (by application_number, ambassador id,
+    tutor id, created) like this: ?ordering=ambassador (in the end of URL).
+    For reverse ordering insert a minus sign before the field name
+    like this: ?ordering=-ambassador
+    """
 
     http_method_names = ["get", "post", "patch", "delete"]
     queryset = MerchApplication.objects.all()
@@ -179,15 +187,40 @@ class MerchCategoryViewSet(viewsets.ModelViewSet):
 # TODO: make filtering by name, size, cost, category slug
 # TODO: add 4XX responses to Swagger api docs
 class MerchViewSet(viewsets.ModelViewSet):
-    """ViewSet for merch species."""
+    """
+    ViewSet for merch species.
+    Basic items ordering is carried out by ID.
+    You can order objects by other fields (by name, size, slug, cost, and category id)
+    like this: ?ordering=cost (in the end of URL).
+    For reverse ordering insert a minus sign before the field name
+    like this: ?ordering=-cost
+    """
 
     http_method_names = ["get", "post", "patch", "delete"]
     queryset = Merch.objects.all()
     serializer_class = MerchSerializer
     permission_classes = [permissions.IsAuthenticated]
-    # filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    # filterset_class = MerchApplicationsFilter
-    # ordering = ["pk"]
+    filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
+    # filterset_class =
+    ordering = ["pk"]
 
     def get_queryset(self):
         return MerchSerializer.setup_eager_loading(Merch.objects.all())
+
+
+# TODO: make ordering by date (created field) and ambassador name
+# TODO: make filtering by different fields
+# TODO: add 4XX responses to Swagger api docs
+class PromocodeViewSet(viewsets.ModelViewSet):
+    """ViewSet for promocodes."""
+
+    http_method_names = ["get", "post", "patch", "delete"]
+    queryset = Promocode.objects.all()
+    serializer_class = PromocodeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
+    # filterset_class =
+    ordering = ["pk"]
+
+    def get_queryset(self):
+        return PromocodeSerializer.setup_eager_loading(Promocode.objects.all())
