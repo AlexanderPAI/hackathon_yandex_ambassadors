@@ -6,7 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
-from .filters import MerchApplicationsFilter
+from .filters import MerchApplicationsFilter, PromocodeFilter
 from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
     MerchApplicationCreateUpdateSerializer,
@@ -60,7 +60,7 @@ ambassadors = openapi.Parameter(
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for merch applications and annual merch budgets.
-    Basic merch appications sorting is carried out by ID.
+    By default, sorting is done by ID.
     You can also sort them by the following fields: ambassador__name,
     ambassador__clothing_size, ambassador__shoe_size, ambassador__address__postal_code,
     application_number, merch__name, 'tutor__first_name,tutor__last_name' (combined
@@ -225,18 +225,31 @@ class MerchViewSet(viewsets.ModelViewSet):
         return MerchSerializer.setup_eager_loading(Merch.objects.all())
 
 
-# TODO: make ordering by date (created field) and ambassador name
-# TODO: make filtering by different fields
 # TODO: add 4XX responses to Swagger api docs
 class PromocodeViewSet(viewsets.ModelViewSet):
-    """ViewSet for promocodes."""
+    """
+    ViewSet for promocodes.
+    By default, sorting is done by ID.
+    You can also sort promocodes by the following fields: code, created,
+    ambassador__name, ambassador__status, ambassador__telegram_id.
+    Example: ?ordering=ambassador__name (in the end of URL).
+    For reverse sorting insert a minus sign before the field name
+    like this: ?ordering=-ambassador__name (in the end of URL).
+    """
 
     http_method_names = ["get", "post", "patch", "delete"]
     queryset = Promocode.objects.all()
     serializer_class = PromocodeSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    # filterset_class =
+    filterset_class = PromocodeFilter
+    ordering_fields = [
+        "code",
+        "created",
+        "ambassador__name",
+        "ambassador__status",
+        "ambassador__telegram_id",
+    ]
     ordering = ["pk"]
 
     def get_queryset(self):

@@ -53,4 +53,5 @@ class PurposeAdmin(admin.ModelAdmin):
 class StatusAdmin(admin.ModelAdmin):
     """Add Status to admin panel"""
 
-    list_display = ("name",)
+    list_display = ("pk", "name", "slug")
+    list_display_links = ("name",)
