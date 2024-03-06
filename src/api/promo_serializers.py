@@ -271,9 +271,8 @@ class MerchCategorySerializer(serializers.ModelSerializer):
         fields = ["id", "name", "slug"]
 
 
-# TODO: separate serializer to create/update merch?
 class MerchSerializer(serializers.ModelSerializer):
-    """Serializer for merch species."""
+    """Serializer to display merch species."""
 
     category = MerchCategorySerializer()
 
@@ -287,9 +286,16 @@ class MerchSerializer(serializers.ModelSerializer):
         return queryset.select_related("category")
 
 
-# TODO: separate serializer to create/update promocodes?
+class MerchCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer to create/edit merch species."""
+
+    class Meta:
+        model = Merch
+        fields = ["id", "name", "size", "slug", "cost", "category"]
+
+
 class PromocodeSerializer(serializers.ModelSerializer):
-    """Serializer for promocodes."""
+    """Serializer to display promocodes."""
 
     ambassador = AmbassadorPromocodeSerializer()
 
@@ -301,3 +307,11 @@ class PromocodeSerializer(serializers.ModelSerializer):
     def setup_eager_loading(cls, queryset):
         """Performs necessary eager loading of merch species data."""
         return queryset.select_related("ambassador__status")
+
+
+class PromocodeCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer to create/edit promocodes."""
+
+    class Meta:
+        model = Promocode
+        fields = ["id", "code", "created", "is_active", "ambassador"]

@@ -19,7 +19,9 @@ from .promo_serializers import (
     MerchApplicationCreateUpdateSerializer,
     MerchApplicationSerializer,
     MerchCategorySerializer,
+    MerchCreateUpdateSerializer,
     MerchSerializer,
+    PromocodeCreateUpdateSerializer,
     PromocodeSerializer,
     YearBudgetSerializer,
 )
@@ -436,7 +438,7 @@ class MerchCategoryViewSet(viewsets.ModelViewSet):
     decorator=swagger_auto_schema(
         operation_summary="Create merch",
         responses={
-            201: MerchSerializer,
+            201: MerchCreateUpdateSerializer,
             400: ValidationErrorResponseSerializer,
             401: ErrorResponse401Serializer,
         },
@@ -447,7 +449,7 @@ class MerchCategoryViewSet(viewsets.ModelViewSet):
     decorator=swagger_auto_schema(
         operation_summary="Edit merch",
         responses={
-            200: MerchSerializer,
+            200: MerchCreateUpdateSerializer,
             400: ValidationErrorResponseSerializer,
             401: ErrorResponse401Serializer,
             404: ErrorResponse404Serializer,
@@ -485,6 +487,11 @@ class MerchViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return MerchSerializer.setup_eager_loading(Merch.objects.all())
+
+    def get_serializer_class(self):
+        if self.action in ["create", "partial_update"]:
+            return MerchCreateUpdateSerializer
+        return MerchSerializer
 
 
 @method_decorator(
@@ -610,3 +617,8 @@ class PromocodeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return PromocodeSerializer.setup_eager_loading(Promocode.objects.all())
+
+    def get_serializer_class(self):
+        if self.action in ["create", "partial_update"]:
+            return PromocodeCreateUpdateSerializer
+        return PromocodeSerializer
