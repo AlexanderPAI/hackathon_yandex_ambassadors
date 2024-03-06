@@ -4,6 +4,7 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
+from .ambassadors_views import AmbassadorViewSet
 from .promo_views import MerchApplicationViewSet
 
 app_name = "api"
@@ -11,6 +12,7 @@ app_name = "api"
 router = DefaultRouter()
 
 router.register("send_merch", MerchApplicationViewSet)
+router.register("ambassadors", AmbassadorViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
