@@ -5,7 +5,7 @@ from django.db.models import F, Prefetch, Sum
 from rest_framework import serializers
 
 from ambassadors.models import Address, Ambassador
-from promo.models import Merch, MerchApplication, MerchInApplication
+from promo.models import Merch, MerchApplication, MerchCategory, MerchInApplication
 
 
 class AddressMerchSerializer(serializers.ModelSerializer):
@@ -184,3 +184,26 @@ class YearBudgetSerializer(serializers.Serializer):
     year_total = serializers.FloatField()
     months = MonthBudgetSerializer(many=True)
     ambassadors = AmbassadorBudgetSerializer(many=True)
+
+
+class MerchCategorySerializer(serializers.ModelSerializer):
+    """Serializer for categories of merch."""
+
+    class Meta:
+        model = MerchCategory
+        fields = ["id", "name", "slug"]
+
+
+class MerchSerializer(serializers.ModelSerializer):
+    """Serializer for merch species."""
+
+    category = MerchCategorySerializer()
+
+    class Meta:
+        model = Merch
+        fields = ["id", "name", "size", "slug", "cost", "category"]
+
+    @classmethod
+    def setup_eager_loading(cls, queryset):
+        """Performs necessary eager loading of merch species data."""
+        return queryset.select_related("category")

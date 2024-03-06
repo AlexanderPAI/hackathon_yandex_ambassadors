@@ -31,7 +31,7 @@ class MerchApplicationsFilter(rf_filters.FilterSet):
     )
     start_date = rf_filters.DateTimeFilter(field_name="created", lookup_expr="gte")
     end_date = rf_filters.DateTimeFilter(field_name="created", lookup_expr="lte")
-    merch = CharFilterInFilter()
+    merch = CharFilterInFilter()  # TODO: filter merch by slug, change docstring
 
     class Meta:
         model = MerchApplication

@@ -11,11 +11,13 @@ from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
     MerchApplicationCreateUpdateSerializer,
     MerchApplicationSerializer,
+    MerchCategorySerializer,
+    MerchSerializer,
     YearBudgetSerializer,
 )
 from .utils import generate_application_number
 from ambassadors.models import Ambassador
-from promo.models import MerchApplication
+from promo.models import Merch, MerchApplication, MerchCategory
 
 YEAR_MONTHS = [
     ("january", 1),
@@ -53,9 +55,6 @@ ambassadors = openapi.Parameter(
 )
 
 
-# TODO: make endpoint "budget-price" to see/edit/delete merch items (not applications),
-# mandatory fields - id, name+size, cost,
-# for the page - https://delightful-bublanina-904784.netlify.app/budget-price
 # TODO: make provocodes endpoint (see/edit/delete) for
 # this page https://delightful-bublanina-904784.netlify.app/promocodes
 # TODO: add 4XX responses to Swagger api docs
@@ -166,3 +165,29 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST
             )
         return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MerchCategoryViewSet(viewsets.ModelViewSet):
+    """ViewSet for categories of merch."""
+
+    http_method_names = ["get", "post", "patch", "delete"]
+    queryset = MerchCategory.objects.all()
+    serializer_class = MerchCategorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+# TODO: make filtering by name, size, cost, category slug
+# TODO: add 4XX responses to Swagger api docs
+class MerchViewSet(viewsets.ModelViewSet):
+    """ViewSet for merch species."""
+
+    http_method_names = ["get", "post", "patch", "delete"]
+    queryset = Merch.objects.all()
+    serializer_class = MerchSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    # filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
+    # filterset_class = MerchApplicationsFilter
+    # ordering = ["pk"]
+
+    def get_queryset(self):
+        return MerchSerializer.setup_eager_loading(Merch.objects.all())
