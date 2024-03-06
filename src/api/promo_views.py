@@ -60,14 +60,19 @@ ambassadors = openapi.Parameter(
 class MerchApplicationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for merch applications and annual merch budgets.
-    Basic merch appications ordering is carried out by ID.
-    You can order them by some other fields: ambassador__name,
+    Basic merch appications sorting is carried out by ID.
+    You can also sort them by the following fields: ambassador__name,
     ambassador__clothing_size, ambassador__shoe_size, ambassador__address__postal_code,
     application_number, merch__name, 'tutor__first_name,tutor__last_name' (combined
-    curator's first and last names), created.
-    Example: ?ordering=ambassador__name (in the end of URL).
-    For reverse ordering insert a minus sign before the field name like this:
-    ?ordering=-ambassador__name (in the end of URL).
+    curator's first and last names), created. Example: ?ordering=ambassador__name
+    (in the end of URL).
+    For reverse sorting insert a minus sign before the field name
+    like this: ?ordering=-ambassador__name (in the end of URL).
+
+    You can filter merch appications by application_number (by partial occurrence in
+    a string), ambassador (by ID), tutor (by ID), merch (by slug, can accept sevelal
+    comma-separated slugs), start_date and end_date (takes datetime string, examples:
+    "2020-01-01", "2024-03-04T16:20:55").
     """
 
     http_method_names = ["get", "post", "patch", "delete"]
@@ -201,11 +206,11 @@ class MerchCategoryViewSet(viewsets.ModelViewSet):
 class MerchViewSet(viewsets.ModelViewSet):
     """
     ViewSet for merch species.
-    Basic items ordering is carried out by ID.
-    You can order objects by other fields (by name, size, slug, cost, and category id)
+    Basic items sorting is carried out by ID.
+    You can sort objects by other fields (by name, size, slug, cost, and category id)
     like this: ?ordering=cost (in the end of URL).
-    For reverse ordering insert a minus sign before the field name
-    like this: ?ordering=-cost
+    For reverse sorting insert a minus sign before the field name
+    like this: ?ordering=-cost (in the end of URL).
     """
 
     http_method_names = ["get", "post", "patch", "delete"]

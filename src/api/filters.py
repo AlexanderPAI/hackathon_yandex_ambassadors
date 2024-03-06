@@ -18,8 +18,9 @@ class MerchApplicationsFilter(rf_filters.FilterSet):
     The filter for the 'application_number' field works on a partial occurrence
     (istartswith and icontains).
 
-    Filters for fields 'ambassador', 'tutor' and 'merch' work by ID.
-    The filter for the 'merch' field can accept several merch IDs separated by commas.
+    Filters for fields 'ambassador', 'tutor' work by ID.
+    The filter for the 'merch' field works by slug and accepts several comma-separated
+    values, for example: ?merch=coffee-l%2Cshopper-gray (in the end of URL).
 
     Filters 'start_date' and 'end_date' take datetime string
     (input examples: "2020-01-01", "2024-03-04T16:20:55") as input and compare it
@@ -31,7 +32,7 @@ class MerchApplicationsFilter(rf_filters.FilterSet):
     )
     start_date = rf_filters.DateTimeFilter(field_name="created", lookup_expr="gte")
     end_date = rf_filters.DateTimeFilter(field_name="created", lookup_expr="lte")
-    merch = CharFilterInFilter()  # TODO: filter merch by slug, change docstring
+    merch = CharFilterInFilter(field_name="merch__slug")
 
     class Meta:
         model = MerchApplication
