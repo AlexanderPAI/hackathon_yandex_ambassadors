@@ -1,14 +1,17 @@
 from django.db import models
 from django.utils.text import slugify
 
-# TODO Поле gender, отдельные таблицы или enums
+from users.models import User
 
 
 class GroupPurposeProgramStatusBase(models.Model):
-    """Describes models base class Group, Purpose, Program and Status"""
+    """Describes models base class Activity, Group, Purpose, Program and Status"""
 
-    name = models.CharField(max_length=75)
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name="Slug"
+    )
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -21,6 +24,10 @@ class GroupPurposeProgramStatusBase(models.Model):
 
 class Group(GroupPurposeProgramStatusBase):
     """Describes Group entity"""
+    name = models.CharField(
+        max_length=75,
+        verbose_name="Название группы"
+    )
 
     class Meta:
         verbose_name = "Группа"
@@ -29,8 +36,16 @@ class Group(GroupPurposeProgramStatusBase):
 
 class Purpose(GroupPurposeProgramStatusBase):
     """Describes Purpose entity"""
+    name = models.CharField(
+        max_length=75,
+        verbose_name="Цель в Практикуме"
+    )
 
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Moя цель в Практикуме"
+    )
 
     class Meta:
         verbose_name = "Цель"
@@ -40,6 +55,11 @@ class Purpose(GroupPurposeProgramStatusBase):
 class Program(GroupPurposeProgramStatusBase):
     """Describes Program entity"""
 
+    name = models.CharField(
+        max_length=75,
+        verbose_name="Программа в Практикуме"
+    )
+
     class Meta:
         verbose_name = "Программа"
         verbose_name_plural = "Программы"
@@ -47,19 +67,47 @@ class Program(GroupPurposeProgramStatusBase):
 
 class Status(GroupPurposeProgramStatusBase):
     """Describes Status entity"""
+    name = models.CharField(
+        max_length=75,
+        verbose_name="Статус"
+    )
 
     class Meta:
         verbose_name = "Статус"
         verbose_name_plural = "Статусы"
 
 
+class Activity(GroupPurposeProgramStatusBase):
+    """Describes Activity entity"""
+    name = models.CharField(
+        max_length=75,
+        verbose_name="Цель Амбассадорства"
+    )
+
+    class Meta:
+        verbose_name = "Активность"
+        verbose_name_plural = "Активности"
+
+
 class Address(models.Model):
     """Describes Address entity"""
 
-    postal_code = models.CharField(max_length=6)
-    country = models.CharField(max_length=50)
-    city = models.CharField(max_length=50)
-    street = models.CharField(max_length=50)
+    postal_code = models.CharField(
+        max_length=6,
+        verbose_name="Индекс"
+    )
+    country = models.CharField(
+        max_length=50,
+        verbose_name="Страна"
+    )
+    city = models.CharField(
+        max_length=50,
+        verbose_name="Город"
+    )
+    street = models.CharField(
+        max_length=50,
+        verbose_name="Улица"
+    )
 
     class Meta:
         verbose_name = "Адрес"
@@ -77,31 +125,97 @@ class Ambassador(models.Model):
         ("Ж", "Женский"),
     )
 
-    created = models.DateTimeField(auto_now_add=True)
-    name = models.CharField(max_length=50)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
-    clothing_size = models.CharField(max_length=2)
-    shoe_size = models.CharField(max_length=4)
-    education = models.CharField(max_length=120)
-    job = models.CharField(max_length=120)
-    email = models.EmailField(max_length=30)
-    address = models.ForeignKey(
-        Address, on_delete=models.PROTECT, related_name="ambassadors"
+    CLOTHES_SIZE_CHOICES = (
+        ("XS", "Extra Small"),
+        ("S", "Small"),
+        ("M", "Medium"),
+        ("L", "Large"),
+        ("XL", "Extra Large"),
+
     )
-    phone_number = models.CharField(max_length=14)
-    telegram_id = models.CharField(max_length=30)
-    whatsapp = models.CharField(max_length=14, null=True, blank=True)
-    activity = models.CharField(max_length=255)
-    blog_link = models.URLField(max_length=255, null=True, blank=True)
-    # TODO ForeignKey - tutor field
-    tutor = models.IntegerField(default=0)
-    onbording_status = models.BooleanField(default=True)
+
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата регистрации"
+    )
+    name = models.CharField(
+        max_length=50,
+        verbose_name="ФИО"
+    )
+    gender = models.CharField(
+        max_length=1,
+        choices=GENDER_CHOICES,
+        verbose_name="Пол"
+    )
+    clothing_size = models.CharField(
+        max_length=2,
+        choices=CLOTHES_SIZE_CHOICES,
+        verbose_name="Размер одежды"
+    )
+    shoe_size = models.CharField(
+        max_length=4,
+        verbose_name="Размер обуви"
+    )
+    education = models.CharField(
+        max_length=120,
+        verbose_name="Образование"
+    )
+    job = models.CharField(
+        max_length=120,
+        verbose_name="Место работы"
+    )
+    email = models.EmailField(
+        max_length=30,
+        verbose_name="e=Mail"
+    )
+    address = models.ForeignKey(
+        Address,
+        on_delete=models.PROTECT,
+        related_name="ambassadors",
+        verbose_name="Адрес"
+    )
+    phone_number = models.CharField(
+        max_length=20,
+        verbose_name="Номер телефона"
+    )
+    telegram_id = models.CharField(
+        max_length=30,
+        verbose_name="Telegram"
+    )
+    whatsapp = models.CharField(
+        max_length=14,
+        null=True,
+        blank=True,
+        verbose_name="Whatsapp"
+    )
+    activity = models.ManyToManyField(
+        Activity,
+        through="AmbassadorActivity",
+        related_name="ambassadors",
+        verbose_name="Цель Амбассадорства"
+    )
+    blog_link = models.URLField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="Ссылка на блог"
+    )
+    tutor = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="ambassadors",
+        verbose_name="Наставник"
+    )
+    onboarding_status = models.BooleanField(default=True)
     status = models.ForeignKey(
         Status,
         on_delete=models.PROTECT,
         null=True,
         blank=False,
         related_name="ambassadors",
+        verbose_name="Статус"
     )
     program = models.ForeignKey(
         Program,
@@ -109,6 +223,7 @@ class Ambassador(models.Model):
         null=True,
         blank=False,
         related_name="ambassadors",
+        verbose_name="Программа в Практикуме"
     )
     purpose = models.ForeignKey(
         Purpose,
@@ -116,15 +231,33 @@ class Ambassador(models.Model):
         null=True,
         blank=False,
         related_name="ambassadors",
+        verbose_name="Цель в Практикуме"
     )
-    about_me = models.TextField(null=True, blank=True)
-    # TODO ForeignKey promocode field
-    promocode = models.IntegerField(default=0)
+    personal_purpose = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Моя цель в Практикуме"
+
+    )
+    about_me = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="О себе"
+    )
+    promocode = models.ForeignKey(
+        "promo.Promocode",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="ambassadors",
+        verbose_name="Промокод"
+    )
     group = models.ForeignKey(
         Group,
         on_delete=models.PROTECT,
+        null=True,
+        blank=True,
         related_name="ambassadors",
-        verbose_name="Группа",
     )
 
     class Meta:
@@ -137,13 +270,30 @@ class Ambassador(models.Model):
         )
 
 
+class AmbassadorActivity(models.Model):
+    """Describe Ambassador and Activity relations"""
+    ambassador = models.ForeignKey(
+        Ambassador, on_delete=models.CASCADE,
+    )
+    activity = models.ForeignKey(
+        Activity, on_delete=models.CASCADE,
+    )
+
+
 class AmbassadorMerch(models.Model):
     """Describe Ambassador and Merch relations"""
 
-    # TODO ForeignKey merch field
-    merch = models.IntegerField(default=0)
+    merch = models.ForeignKey(
+        "promo.Merch",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="ambassadors"
+    )
     ambassador = models.ForeignKey(
-        Ambassador, on_delete=models.CASCADE, related_name="Merch"
+        Ambassador,
+        on_delete=models.CASCADE,
+        related_name="Merch"
     )
     amount_of_shipments = models.IntegerField()
 
