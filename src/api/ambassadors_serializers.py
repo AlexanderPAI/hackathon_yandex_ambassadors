@@ -35,14 +35,13 @@ class PurposeSerializer(serializers.ModelSerializer):
 
 
 class AmbassadorReadSerializer(serializers.ModelSerializer):
-    activity = ActivitySerializer(many=True)
+    activity = ActivitySerializer(read_only=True, many=True)
     address = AddressSerializer(read_only=True)
     purpose = serializers.StringRelatedField(read_only=True)
     program = serializers.StringRelatedField(read_only=True)
     group = serializers.StringRelatedField(read_only=True)
     tutor = serializers.StringRelatedField(read_only=True)
     status = serializers.StringRelatedField(read_only=True)
-    promocode = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = Ambassador
@@ -51,8 +50,8 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
             "job",
             "email", "phone_number", "telegram_id", "whatsapp", "activity",
             "blog_link", "onboarding_status", "personal_purpose", "purpose",
-            "about_me", "tutor", "status", "promocode", "program",
-            "address", "group",)
+            "about_me", "tutor", "status", "program", "address", "group",
+            "promocodes",)
 
 
 class AmbassadorCreateSerializer(serializers.ModelSerializer):
