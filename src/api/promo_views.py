@@ -13,7 +13,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
-from .filters import MerchApplicationsFilter, MerchFilter, PromocodeFilter
+# from .filters import MerchApplicationsFilter, MerchFilter, PromocodeFilter
 from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
     MerchApplicationCreateUpdateSerializer,
@@ -201,7 +201,7 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
     serializer_class = MerchApplicationSerializer
     permission_classes = [permissions.IsAuthenticated, IsTutorOrReadOnly]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    filterset_class = MerchApplicationsFilter
+    # filterset_class = MerchApplicationsFilter
     ordering_fields = [
         "ambassador__name",
         "ambassador__clothing_size",
@@ -482,7 +482,7 @@ class MerchViewSet(viewsets.ModelViewSet):
     serializer_class = MerchSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    filterset_class = MerchFilter
+    # filterset_class = MerchFilter
     ordering = ["pk"]
 
     def get_queryset(self):
@@ -605,7 +605,7 @@ class PromocodeViewSet(viewsets.ModelViewSet):
     serializer_class = PromocodeSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [rf_filters.DjangoFilterBackend, filters.OrderingFilter]
-    filterset_class = PromocodeFilter
+    # filterset_class = PromocodeFilter
     ordering_fields = [
         "code",
         "created",

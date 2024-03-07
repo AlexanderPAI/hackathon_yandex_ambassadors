@@ -42,7 +42,7 @@ class Merch(models.Model):
         related_name="merch",
         verbose_name="Category",
     )
-    slug = models.SlugField("Slug", max_length=100, unique=True, blank=True)
+    # slug = models.SlugField("Slug", max_length=100, unique=True, blank=True)
     size = models.CharField("Size", max_length=20, blank=True)
     cost = models.FloatField("Cost", validators=[MinValueValidator(0)])
 
@@ -56,11 +56,11 @@ class Merch(models.Model):
         ]
         ordering = ["id"]
 
-    def save(self, *args, **kwargs):
-        """Makes slug from a name and size (cyrillic letters are acceptable too)."""
-        if not self.slug:
-            self.slug = f"{slugify(self.name, allow_unicode=True)}{self.size}"
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     """Makes slug from a name and size (cyrillic letters are acceptable too)."""
+    #     if not self.slug:
+    #         self.slug = f"{slugify(self.name, allow_unicode=True)}{self.size}"
+    #     super().save(*args, **kwargs)
 
     def __str__(self):
         if self.size:
@@ -75,6 +75,8 @@ class Promocode(models.Model):
     ambassador = models.ForeignKey(
         Ambassador,
         on_delete=models.CASCADE,
+        blank=True,
+        null=True,
         related_name="promocodes",
         verbose_name="Ambassador",
     )
@@ -94,12 +96,12 @@ class MerchApplication(models.Model):
     """Describes applications for sending merch to ambassadors."""
 
     application_number = models.CharField("Number", max_length=50, unique=True)
-    ambassador = models.ForeignKey(
-        Ambassador,
-        on_delete=models.CASCADE,
-        related_name="merch_applications",
-        verbose_name="Ambassador",
-    )
+    # ambassador = models.ForeignKey(
+    #     Ambassador,
+    #     on_delete=models.CASCADE,
+    #     related_name="merch_applications",
+    #     verbose_name="Ambassador",
+    # )
     tutor = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -118,6 +120,9 @@ class MerchApplication(models.Model):
         verbose_name = "Заявка на мерч"
         verbose_name_plural = "Заявки на мерч"
 
+    @property
+    def merch_cost(self):
+        return self.merch.aggregate(models.Sum('cost'))['cost__sum']
     def __str__(self):
         return self.application_number
 

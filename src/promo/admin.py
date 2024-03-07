@@ -21,9 +21,9 @@ class MerchInApplicationInline(admin.TabularInline):
 class MerchAdmin(admin.ModelAdmin):
     """Displays merch species in admin panel."""
 
-    list_display = ["pk", "name", "category", "slug", "size", "cost"]
+    list_display = ["pk", "name", "category", "size", "cost"]
     list_display_links = ["name"]
-    search_fields = ["name", "slug"]
+    search_fields = ["name"]
     list_filter = ["category", "size", "cost"]
     ordering = ["pk"]
 
@@ -45,44 +45,43 @@ class MerchApplicationAdmin(admin.ModelAdmin):
     list_display = [
         "pk",
         "application_number",
-        "ambassador",
         "tutor",
         "created",
         "merch_cost",
     ]
     list_display_links = ["application_number"]
     list_filter = ["tutor", "created"]
-    search_fields = ["application_number", "ambassador"]
+    search_fields = ["application_number"]
     inlines = [MerchInApplicationInline]
 
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        return (
-            queryset.select_related(
-                "ambassador__program",
-                "ambassador__group",
-                "ambassador__status",
-                "ambassador__purpose",
-                "tutor",
-            )
-            .prefetch_related(
-                Prefetch(
-                    "merch_in_applications",
-                    queryset=MerchInApplication.objects.select_related("merch"),
-                )
-            )
-            .annotate(
-                merch_cost=Sum(
-                    F("merch_in_applications__quantity")
-                    * F("merch_in_applications__merch__cost"),
-                    default=0,
-                ),
-            )
-        )
+    # def get_queryset(self, request):
+    #     queryset = super().get_queryset(request)
+    #     return (
+    #         queryset.select_related(
+    #             "ambassador__program",
+    #             "ambassador__group",
+    #             "ambassador__status",
+    #             "ambassador__purpose",
+    #             "tutor",
+    #         )
+    #         .prefetch_related(
+    #             Prefetch(
+    #                 "merch_in_applications",
+    #                 queryset=MerchInApplication.objects.select_related("merch"),
+    #             )
+    #         )
+    #         .annotate(
+    #             merch_cost=Sum(
+    #                 F("merch_in_applications__quantity")
+    #                 * F("merch_in_applications__merch__cost"),
+    #                 default=0,
+    #             ),
+    #         )
+    #     )
 
-    @admin.display(description="Merch cost", ordering="merch_cost")
-    def merch_cost(self, obj):
-        return obj.merch_cost
+    # @admin.display(description="Merch cost", ordering="merch_cost")
+    # def merch_cost(self, obj):
+    #     return obj.merch_cost
 
 
 @admin.register(MerchInApplication)
