@@ -171,14 +171,14 @@ class Ambassador(models.Model):
         null=True, blank=True, verbose_name="Моя цель в Практикуме"
     )
     about_me = models.TextField(null=True, blank=True, verbose_name="О себе")
-    promocode = models.ForeignKey(
-        "promo.Promocode",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="ambassadors",
-        verbose_name="Промокод",
-    )
+    # promocode = models.ForeignKey(
+    #     "promo.Promocode",
+    #     on_delete=models.PROTECT,
+    #     null=True,
+    #     blank=True,
+    #     related_name="ambassadors",
+    #     verbose_name="Промокод",
+    # )
     group = models.ForeignKey(
         Group,
         on_delete=models.PROTECT,
