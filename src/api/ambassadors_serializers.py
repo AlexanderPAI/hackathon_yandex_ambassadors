@@ -78,7 +78,7 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
 
     @classmethod
     def setup_eager_loading(cls, queryset):
-        """Performs necessary eager loading of merch applications data."""
+        """Performs necessary eager loading of ambassadors data."""
         return queryset.select_related(
             "tutor", "address", "status", "program", "purpose", "group"
         ).prefetch_related("activity", "promocodes")
