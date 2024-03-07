@@ -1,6 +1,17 @@
 from django.contrib import admin
 
-from content.models import GuideTaskGuideKit, Guide, GuideStatus, GuideKit, GuideTask, MerchPhoto, Review, ReviewPlatfrom, Content, ContentPlatform
+from content.models import (
+    Content,
+    ContentPlatform,
+    Guide,
+    GuideKit,
+    GuideStatus,
+    GuideTask,
+    GuideTaskGuideKit,
+    MerchPhoto,
+    Review,
+    ReviewPlatfrom,
+)
 
 
 class GuideTasksInGuideKitsInLine(admin.TabularInline):
@@ -21,7 +32,6 @@ class GuideKitAdmin(admin.ModelAdmin):
     list_display = ["id", "name"]
     search_fields = ["name"]
     inlines = [GuideTasksInGuideKitsInLine]
-
 
 
 @admin.register(GuideStatus)
@@ -81,5 +91,5 @@ class ContentAdmin(admin.ModelAdmin):
         "created",
         "platform",
         "link",
-        "is_guide_content"
+        "is_guide_content",
     ]

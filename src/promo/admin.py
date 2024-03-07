@@ -63,6 +63,7 @@ class MerchApplicationAdmin(admin.ModelAdmin):
                 "ambassador__group",
                 "ambassador__status",
                 "ambassador__purpose",
+                "ambassador__tutor",
                 "tutor",
             )
             .prefetch_related(

@@ -1,7 +1,14 @@
 from rest_framework.viewsets import ModelViewSet
 
-from content.models import GuideTask, GuideKit, GuideTaskGuideKit, GuideStatus, Guide, MerchPhoto, ReviewPlatfrom, Review, ContentPlatform, Content
-from api.content_serializers import GuideSerializer, GuideTaskSerializer, GuideKitSerializer, GuideTaskGuideKitSerializer
+from api.content_serializers import (  # GuideTaskGuideKitSerializer,
+    GuideKitSerializer,
+    GuideSerializer,
+    GuideTaskSerializer,
+)
+from content.models import Guide, GuideKit, GuideTask
+
+# Content,; ContentPlatform,; GuideStatus,; GuideTaskGuideKit,; MerchPhoto,; Review,;
+# ReviewPlatfrom,
 
 
 class GuideTaskViewSet(ModelViewSet):
