@@ -7,7 +7,6 @@ from api.ambassadors_serializers import (
 )
 
 
-# TODO: n+1 problen
 class AmbassadorViewSet(ModelViewSet):
     queryset = Ambassador.objects.all()
     serializer_class = AmbassadorReadSerializer
@@ -24,3 +23,6 @@ class AmbassadorViewSet(ModelViewSet):
             return self.serializer_action_classes[self.action]
         except KeyError:
             return super().get_serializer_class()
+
+    def get_queryset(self):
+        return AmbassadorReadSerializer.setup_eager_loading(Ambassador.objects.all())
