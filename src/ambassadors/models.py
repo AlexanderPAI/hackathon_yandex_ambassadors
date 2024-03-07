@@ -171,14 +171,6 @@ class Ambassador(models.Model):
         null=True, blank=True, verbose_name="Моя цель в Практикуме"
     )
     about_me = models.TextField(null=True, blank=True, verbose_name="О себе")
-    promocode = models.ForeignKey(
-        "promo.Promocode",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="ambassadors",
-        verbose_name="Промокод",
-    )
     group = models.ForeignKey(
         Group,
         on_delete=models.PROTECT,
@@ -208,22 +200,3 @@ class AmbassadorActivity(models.Model):
         Activity,
         on_delete=models.CASCADE,
     )
-
-
-class AmbassadorMerch(models.Model):
-    """Describe Ambassador and Merch relations"""
-
-    merch = models.ForeignKey(
-        "promo.Merch",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="ambassadors",
-    )
-    ambassador = models.ForeignKey(
-        Ambassador, on_delete=models.CASCADE, related_name="Merch"
-    )
-    amount_of_shipments = models.IntegerField()
-
-    def __str__(self):
-        return f"{self.ambassador} {self.merch} {self.amount_of_shipments}"
