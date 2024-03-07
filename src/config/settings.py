@@ -24,8 +24,9 @@ if MODE == "dev":
 else:
     DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="").split()
 
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", default="").split()
 
 AUTH_USER_MODEL = "users.User"
 

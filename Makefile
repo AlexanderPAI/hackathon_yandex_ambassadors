@@ -69,3 +69,9 @@ shell-compose:
 
 ls-compose:
 	sudo docker compose -f docker-compose.local.yml exec -it backend ls
+
+prune-containers:
+	sudo docker container prune
+
+prune-images:
+	sudo docker image prune
