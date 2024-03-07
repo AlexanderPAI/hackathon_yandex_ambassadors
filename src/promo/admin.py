@@ -55,6 +55,7 @@ class MerchApplicationAdmin(admin.ModelAdmin):
     search_fields = ["application_number", "ambassador"]
     inlines = [MerchInApplicationInline]
 
+    # TODO: make it in model under @property?
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         return (
@@ -63,6 +64,7 @@ class MerchApplicationAdmin(admin.ModelAdmin):
                 "ambassador__group",
                 "ambassador__status",
                 "ambassador__purpose",
+                "ambassador__tutor",
                 "tutor",
             )
             .prefetch_related(
@@ -106,4 +108,6 @@ class PromocodeAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        return queryset.select_related("ambassador__program", "ambassador__status")
+        return queryset.select_related(
+            "ambassador__program", "ambassador__status", "ambassador__tutor"
+        )

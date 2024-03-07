@@ -32,32 +32,32 @@ class AddressAdmin(admin.ModelAdmin):
 class GroupAdmin(admin.ModelAdmin):
     """Add Group to admin panel"""
 
-    list_display = ("name",)
+    list_display = ("name", "slug")
 
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
     """Add Program to admin panel"""
 
-    list_display = ("name",)
+    list_display = ("name", "slug")
 
 
 @admin.register(Purpose)
 class PurposeAdmin(admin.ModelAdmin):
     """Add Purpose to admin panel"""
 
-    list_display = ("name", "description")
+    list_display = ("name", "slug", "description")
 
 
 @admin.register(Status)
 class StatusAdmin(admin.ModelAdmin):
     """Add Status to admin panel"""
 
-    list_display = ("name",)
+    list_display = ("name", "slug")
 
 
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
     """Add Activity to admin panel"""
 
-    list_display = ("name",)
+    list_display = ("name", "slug")

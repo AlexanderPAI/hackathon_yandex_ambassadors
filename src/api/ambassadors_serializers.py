@@ -13,7 +13,12 @@ from ambassadors.models import (
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ("postal_code", "country", "city", "street",)
+        fields = (
+            "postal_code",
+            "country",
+            "city",
+            "street",
+        )
 
 
 class ActivitySerializer(serializers.ModelSerializer):
@@ -46,12 +51,37 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ambassador
         fields = (
-            "created", "name", "gender", "clothing_size", "shoe_size", "education",
+            "created",
+            "name",
+            "gender",
+            "clothing_size",
+            "shoe_size",
+            "education",
             "job",
-            "email", "phone_number", "telegram_id", "whatsapp", "activity",
-            "blog_link", "onboarding_status", "personal_purpose", "purpose",
-            "about_me", "tutor", "status", "program", "address", "group",
-            "promocodes",)
+            "email",
+            "phone_number",
+            "telegram_id",
+            "whatsapp",
+            "activity",
+            "blog_link",
+            "onboarding_status",
+            "personal_purpose",
+            "purpose",
+            "about_me",
+            "tutor",
+            "status",
+            "program",
+            "address",
+            "group",
+            "promocodes",
+        )
+
+    @classmethod
+    def setup_eager_loading(cls, queryset):
+        """Performs necessary eager loading of ambassadors data."""
+        return queryset.select_related(
+            "tutor", "address", "status", "program", "purpose", "group"
+        ).prefetch_related("activity", "promocodes")
 
 
 class AmbassadorCreateSerializer(serializers.ModelSerializer):
@@ -62,9 +92,24 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ambassador
-        fields = ("name", "gender", "clothing_size", "shoe_size", "education", "job",
-                  "email", "phone_number", "telegram_id", "activity", "blog_link",
-                  "personal_purpose", "purpose", "about_me", "program", "address")
+        fields = (
+            "name",
+            "gender",
+            "clothing_size",
+            "shoe_size",
+            "education",
+            "job",
+            "email",
+            "phone_number",
+            "telegram_id",
+            "activity",
+            "blog_link",
+            "personal_purpose",
+            "purpose",
+            "about_me",
+            "program",
+            "address",
+        )
 
     def create(self, validated_data):
         program_data = validated_data.pop("program")
@@ -80,8 +125,5 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
 
         for activity in activities:
             activity = Activity.objects.get_or_create(**activity)[0]
-            AmbassadorActivity(
-                ambassador=ambassador,
-                activity=activity
-            ).save()
+            AmbassadorActivity(ambassador=ambassador, activity=activity).save()
         return ambassador

@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.text import slugify
 
 from users.models import User
 
@@ -8,14 +7,6 @@ class GroupPurposeProgramStatusBase(models.Model):
     """Describes models base class Activity, Group, Purpose, Program and Status"""
 
     slug = models.SlugField(max_length=50, unique=True, verbose_name="Slug")
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
 
 
 class Group(GroupPurposeProgramStatusBase):
@@ -26,6 +17,9 @@ class Group(GroupPurposeProgramStatusBase):
     class Meta:
         verbose_name = "Группа"
         verbose_name_plural = "Группы"
+
+    def __str__(self):
+        return self.name
 
 
 class Purpose(GroupPurposeProgramStatusBase):
@@ -41,6 +35,9 @@ class Purpose(GroupPurposeProgramStatusBase):
         verbose_name = "Цель"
         verbose_name_plural = "Цели"
 
+    def __str__(self):
+        return self.name
+
 
 class Program(GroupPurposeProgramStatusBase):
     """Describes Program entity"""
@@ -50,6 +47,9 @@ class Program(GroupPurposeProgramStatusBase):
     class Meta:
         verbose_name = "Программа"
         verbose_name_plural = "Программы"
+
+    def __str__(self):
+        return self.name
 
 
 class Status(GroupPurposeProgramStatusBase):
@@ -61,6 +61,9 @@ class Status(GroupPurposeProgramStatusBase):
         verbose_name = "Статус"
         verbose_name_plural = "Статусы"
 
+    def __str__(self):
+        return self.name
+
 
 class Activity(GroupPurposeProgramStatusBase):
     """Describes Activity entity"""
@@ -70,6 +73,9 @@ class Activity(GroupPurposeProgramStatusBase):
     class Meta:
         verbose_name = "Активность"
         verbose_name_plural = "Активности"
+
+    def __str__(self):
+        return self.name
 
 
 class Address(models.Model):
@@ -113,7 +119,7 @@ class Ambassador(models.Model):
     shoe_size = models.CharField(max_length=4, verbose_name="Размер обуви")
     education = models.CharField(max_length=120, verbose_name="Образование")
     job = models.CharField(max_length=120, verbose_name="Место работы")
-    email = models.EmailField(max_length=30, verbose_name="e=Mail")
+    email = models.EmailField(max_length=30, verbose_name="Email")
     address = models.ForeignKey(
         Address,
         on_delete=models.PROTECT,

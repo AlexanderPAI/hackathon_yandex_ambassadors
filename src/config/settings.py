@@ -191,7 +191,7 @@ DJOSER = {
 # Querycount settings. See https://github.com/bradmontgomery/django-querycount
 
 QUERYCOUNT = {
-    "DISPLAY_DUPLICATES": 3,  # how many duplicated queries to display (None or integer)
+    "DISPLAY_DUPLICATES": None,  # how many duplicated queries to display (None or integer)
 }
 
 # CORS settings for frontend development
