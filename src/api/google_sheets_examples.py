@@ -13,11 +13,6 @@ from googleapiclient.errors import HttpError
 # - google-auth-httplib2
 # - google-auth-oauthlib
 
-# installed dev dependencies:
-# - flake8
-# - isort
-# - black
-
 dotenv_path = os.path.join(Path(__file__).parent.parent, "config", ".env")
 load_dotenv(dotenv_path)
 
