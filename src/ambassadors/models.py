@@ -5,6 +5,7 @@ from users.models import User
 
 
 class CommonAbstractModel(models.Model):
+    """Describes common abstract models for Purpose, Program, Status, Activity"""
     class Meta:
         abstract = True
 
@@ -141,7 +142,10 @@ class Ambassador(models.Model):
         related_name="ambassadors",
         verbose_name="Наставник",
     )
-    onboarding_status = models.BooleanField(default=True)
+    onboarding_status = models.BooleanField(
+        default=False,
+        verbose_name="Onboarding статус"
+    )
     status = models.ForeignKey(
         Status,
         on_delete=models.PROTECT,
