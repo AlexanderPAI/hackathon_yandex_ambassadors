@@ -36,7 +36,7 @@ class ProgramSerializer(serializers.ModelSerializer):
 class PurposeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purpose
-        fields = ("name",)
+        fields = ("name", "personal_purpose")
 
 
 class AmbassadorReadSerializer(serializers.ModelSerializer):
@@ -65,7 +65,6 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
             "activity",
             "blog_link",
             "onboarding_status",
-            "personal_purpose",
             "purpose",
             "about_me",
             "tutor",
@@ -104,7 +103,6 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
             "telegram_id",
             "activity",
             "blog_link",
-            "personal_purpose",
             "purpose",
             "about_me",
             "program",

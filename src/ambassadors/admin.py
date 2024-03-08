@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Activity, Address, Ambassador, Group, Program, Purpose, Status
+from .models import Activity, Address, Ambassador, Program, Purpose, Status
 
 
 @admin.register(Ambassador)
@@ -13,7 +13,6 @@ class AmbassadorAdmin(admin.ModelAdmin):
         "status",
         "tutor",
     )
-    # exclude = ("address",)
     list_display_links = ("name",)
     list_filter = ("program", "status")
     ordering = ("-created",)
@@ -28,13 +27,6 @@ class AddressAdmin(admin.ModelAdmin):
     list_display = ("pk", "postal_code", "country", "city", "street")
 
 
-@admin.register(Group)
-class GroupAdmin(admin.ModelAdmin):
-    """Add Group to admin panel"""
-
-    list_display = ("name", "slug")
-
-
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
     """Add Program to admin panel"""
@@ -46,7 +38,7 @@ class ProgramAdmin(admin.ModelAdmin):
 class PurposeAdmin(admin.ModelAdmin):
     """Add Purpose to admin panel"""
 
-    list_display = ("name", "slug", "description")
+    list_display = ("name", "slug", "personal_purpose")
 
 
 @admin.register(Status)
