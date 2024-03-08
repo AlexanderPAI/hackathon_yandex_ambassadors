@@ -8,10 +8,14 @@ from users.models import User
 USER_LOGIN = "user"
 USER_EMAIL = "user@ya.ru"
 TEST_PASSWORD = "superhardpassword1"
+USER_LOGIN_2 = "user2"
+USER_EMAIL_2 = "user2@ya.ru"
+TEST_PASSWORD_2 = "hardpassword2"
 
 
 AUTH_URL = "/api/v1/auth/jwt/create"
 GET_USER_URL = "/api/v1/auth/users/me/"
+GET_USER_ACTIONS = "/api/v1/edit_history/"
 
 
 class TestCaseWithMockData(TestCase):
@@ -55,3 +59,9 @@ class UserApiTest(TestCaseWithMockData):
             "email",
         }
         assert data.get("id") == self.user.id
+
+    def test_get_user_actions(self):
+        response = self.client.get(
+            path=GET_USER_ACTIONS.format(),
+        )
+        assert response.status_code == 200
