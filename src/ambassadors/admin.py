@@ -31,25 +31,29 @@ class AddressAdmin(admin.ModelAdmin):
 class ProgramAdmin(admin.ModelAdmin):
     """Add Program to admin panel"""
 
-    list_display = ("name", "slug")
+    list_display = ("pk", "name", "slug")
+    list_display_links = ("name",)
 
 
 @admin.register(Purpose)
 class PurposeAdmin(admin.ModelAdmin):
     """Add Purpose to admin panel"""
 
-    list_display = ("name", "slug", "personal_purpose")
+    list_display = ("pk", "name", "slug", "personal_purpose")
+    list_display_links = ("name",)
 
 
 @admin.register(Status)
 class StatusAdmin(admin.ModelAdmin):
     """Add Status to admin panel"""
 
-    list_display = ("name", "slug")
+    list_display = ("pk", "name", "slug")
+    list_display_links = ("name",)
 
 
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
     """Add Activity to admin panel"""
 
-    list_display = ("name", "slug")
+    list_display = ("pk", "name", "slug")
+    list_display_links = ("name",)

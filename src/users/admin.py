@@ -7,7 +7,11 @@ from django.utils.safestring import mark_safe
 
 from users.models import User
 
-admin.site.register(User, UserAdmin)
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    list_display = ("pk", "username", "email", "first_name", "last_name", "is_staff")
+    list_display_links = ("username",)
 
 
 @admin.register(LogEntry)
