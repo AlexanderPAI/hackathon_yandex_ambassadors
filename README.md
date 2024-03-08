@@ -103,10 +103,17 @@ python3 -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Выполнить миграции:
+Перейти в папку src и выполнить миграции:
 
 ```
+cd src
 python3 manage.py migrate
+```
+
+Собрать папку со статикой:
+
+```
+python3 manage.py collectstatic --no-input
 ```
 
 Создать суперпользователя с правами администратора:
