@@ -1,68 +1,63 @@
 # hackathon_yandex_ambassadors
-![Static Badge](https://img.shields.io/badge/status-in_progress-yellow)
-![main workflow](https://github.com/AlexanderPAI/hackathon_yandex_ambassadors/actions/workflows/main.yaml/badge.svg)   
-Backend CRM Yandex ambassadors - внутренняя CRM система. 
-Пространство для комьюнити менеджера сообщества амбассадоров, в котором можно получать уведомления, делать рассылки и смотреть аналитику.
 
+АПИ для приложение CRM «Амбассадоры Практикума»
 
-## Основной функционал CRM системы:  
-Хранение данных с возможность редактирования и работы с ними (настроенная интеграция с Я Формами)  
-·	Вся информация по амбассадорам из формы  
-·	Промокоды  
-·	Контент  
-·	Программа лояльности  
-·	Отправка мерча  
-·	Бюджет на мерч  
+![Static Badge](https://img.shields.io/badge/status-in_progress-yellow) 
+![main workflow](https://github.com/AlexanderPAI/hackathon_yandex_ambassadors/actions/workflows/main.yaml/badge.svg)
+![Static Badge](https://img.shields.io/badge/Python-FFD43B?logo=python&logoColor=blue) 
+![Static Badge](https://img.shields.io/badge/Django-092E20?logo=django&logoColor=green)
+![Static Badge](https://img.shields.io/badge/Google%20Sheets-34A853?logo=google-sheets&logoColor=white)
+![Static Badge](https://img.shields.io/badge/JWT-000000?logo=JSON%20web%20tokens&logoColor=white)
+![Static Badge](https://img.shields.io/badge/Swagger-85EA2D?logo=Swagger&logoColor=white)
+![Static Badge](https://img.shields.io/badge/PostgreSQL-316192?logo=postgresql&logoColor=white)
+![Static Badge](https://img.shields.io/badge/Docker-2CA5E0?logo=docker&logoColor=white) 
+![Static Badge](https://img.shields.io/badge/Nginx-009639?logo=nginx&logoColor=white) 
+![Static Badge](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)
 
-## Сведения о команде 
-Менеджер проекта - отвечает за синхронизацию Команды, выполнение задач в дедлайны Конкурса и организационные вопросы:   
-Артем Криуков https://t.me/artem_kriukov 
-    
-Product-менеджер – делает: анализ ЦА, прописывает цели, задачи проекта, гипотезы, юзерфлоу (как ни странно, неправда ли), юзерстори, портрет пользователя, рисует макет MVP:     
-Ксения https://t.me/kseniturina 
- 
-SA – отвечает за технические требования:   
-Александр Жолков https://t.me/oozebourne  
-Артем Джага https://t.me/purple_SU  
-Игорь Савельев https://t.me/IgorS1306  
-  
-BA – отвечает за бизнес требования:   
-Sve Ti https://t.me/Sve999Ti  
-Маргарита  https://t.me/MargaritaAVT  
- 
-Дизайнер — креативщик Команды, отвечает за UI/UX, дизайн макетов:    
-Антонина Балашова https://t.me/Antonina_Balashova   
-Екатерина https://t.me/glodeva  
-Мурат Дауров https://t.me/mura_murik  
- 
-Frontend-разработчик – отвечает за визуализацию данных:    
-Анастасия Нистратова https://t.me/Anastasia_Niii  
-Денис https://t.me/DezmonDND  
-Дарья Соколова https://t.me/dariryzhaya  
- 
-Backend-разработчик – отвечает за обработку данных:   
-Александр https://t.me/alex_mw   
-Ear Lin https://t.me/Earlinn   
-Илья Котенко https://t.me/IlyaKotenko  
-Максим Спицын https://t.me/maxu_s  
- 
-## Динамически генерируемая документация апи 
- 
+# Описание проекта
+
+Внутренняя CRM для «Амбассадоры Практикума» – это сервис, предназначенный для управления
+взаимодействием с амбассадорами «Яндекс Практикума».
+Фронтенд CRM взаимодействует с бэкендом через АПИ (часть бэкенда).
+
+С помощью АПИ осуществляются:
+- регистрация и авторизация пользователя;
+- хранение информации о каждом амбассадоре;
+- управление данными амбассадоров: добавление, редактирование и удаление информации;
+- отслеживание активности амбассадоров, прохождения амбассадорами гайда и другие важные
+аспекты взаимодействия с амбассадорами;
+- отправка амбассадорам мерча, учет полученного мерча каждым амбассадором;
+- отслеживание затрат на отправку мерча для каждого амбассадора и в общем за отчетный
+период, учет годовых расходов как по отдельным амбассадорам, так и по всей программе
+в целом;
+- оптимизация взаимодействия с амбассадорами через создание списка часто задаваемых
+вопросов;
+- уведомления от CRM системы для оперативного реагирования на события и изменения.
+
+# Команда backend разработки
+
+- [AlexanderPAI](https://github.com/AlexanderPAI) - тимлид, руководство командой
+backend-разработки, code review, разработка эндпойнтов гайдов и контента амбассадоров
+(эндпойнты guide_kits, guide_tasks, guides)
+- [earlinn](https://github.com/earlinn) - разработка эндпойнтов мерча, заявок на мерч,
+промокодов амбассадоров, годового бюджета (эндпойнты merch_category, merch_price,
+promocodes, send_merch); настройка динамической документации апи в форматах Swagger и
+Redoc; деплой на сервер и настройка CI/CD; настройка интеграции с Google Sheets API
+- [IlyaKotenko](https://github.com/IlyaKotenko) - разработка эндпойнтов создания,
+редактирования, удаления и просмотра информации об амбассадорах (эндпойнты ambassadors);
+настройка интеграции с Яндекс Формами для регистрации новых амбассадоров
+- [mspitsyn](https://github.com/mspitsyn) - разработка эндпойнтов пользователей с
+авторизацией по JWT-токенам (эндпойнты auth), настройка логирования действий юзеров
+через LogEntry (эндпойнты edit_history)
+
+# Динамически генерируемая документация апи
+
 Чтобы посмотреть динамическую документацию апи, нужно запустить приложение и
-пройти по одной из этих ссылок: 
-- в формате Swagger - http://127.0.0.1:8000/api/v1/swagger/  
-- в формате Redoc - http://127.0.0.1:8000/api/v1/redoc/  
- 
- 
-## Стэк технологий   
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
-![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white)
-![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?style=for-the-badge&logo=django&logoColor=white&color=ff1709&labelColor=gray)
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
-![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)
+пройти по одной из этих ссылок:
+- в формате Swagger - https://hackathon-yacrm04.sytes.net/api/v1/swagger/
+- в формате Redoc - https://hackathon-yacrm04.sytes.net/api/v1/redoc/
 
-# Запуск проекта на локальном компьютере
+# Запуск проекта на локальном компьютере (без Docker)
 
 Клонировать репозиторий и перейти в него в командной строке:
 
@@ -75,7 +70,11 @@ cd hackathon_yandex_ambassadors
 содержанием:
 
 ```
-SECRET_KEY = <вписать секретный ключ>
+SECRET_KEY=key
+DOCKER=no
+MODE=dev
+ALLOWED_HOSTS=localhost web testserver 127.0.0.1 0.0.0.0 [::1]
+CSRF_TRUSTED_ORIGINS=http://localhost/*
 ```
 
 Cоздать и активировать виртуальное окружение:
@@ -105,10 +104,17 @@ python3 -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Выполнить миграции:
+Перейти в папку src и выполнить миграции:
 
 ```
+cd src
 python3 manage.py migrate
+```
+
+Собрать папку со статикой:
+
+```
+python3 manage.py collectstatic --no-input
 ```
 
 Создать суперпользователя с правами администратора:
@@ -124,3 +130,60 @@ python3 manage.py runserver
 ```
 
 Выйти из проекта: Ctrl + C.
+
+# Запуск проекта на локальном компьютере в Docker Compose
+
+## Клонирование репозитория, создание контейнеров и первоначальная сборка
+
+_Важно: при работе в Linux или через терминал WSL2 все команды docker и docker compose нужно выполнять от имени суперпользователя — начинайте их с sudo._
+
+Склонировать репозиторий на свой компьютер и перейти в него:
+```
+git clone git@github.com:AlexanderPAI/hackathon_yandex_ambassadors.git
+cd hackathon_yandex_ambassadors
+```
+
+Создать в корневой папке файл .env с необходимыми переменными окружения.
+
+Пример содержимого файла:
+```
+SECRET_KEY=key
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+DB_HOST=db
+DB_PORT=5432
+MODE=dev
+DOCKER=yes
+ALLOWED_HOSTS=localhost web testserver
+CSRF_TRUSTED_ORIGINS=http://localhost/*
+```
+
+Запустить сборку контейнеров с помощью docker compose: 
+```
+docker compose -f docker-compose.local.yml up -d --build
+```
+
+После этого будут созданы и запущены в фоновом режиме контейнеры db, backend и nginx.
+
+Внутри контейнера backend создать админа-суперпользователя для входа в Админку:
+```
+docker compose -f docker-compose.local.yml exec -it backend python manage.py createsuperuser
+```
+
+После этого Админка должна стать доступна по адресу: http://localhost/admin/
+API Root будет доступен по адресу: http://localhost/api/
+
+## Остановка и повторный запуск контейнеров
+
+Для остановки работы приложения можно набрать в терминале команду Ctrl+C или открыть
+второй терминал и выполнить команду:
+```
+docker compose stop 
+```
+
+Снова запустить контейнеры без их пересборки можно командой:
+```
+docker compose start 
+```
