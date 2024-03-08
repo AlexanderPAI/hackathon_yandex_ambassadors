@@ -72,7 +72,7 @@ def get_private_sheet_values(sheet_id: str, cell_range: str) -> list[str]:
         values = result.get("values", [])
         return values
     except HttpError as error:
-        print(error)
+        print(f"An error occurred: {error}")
 
 
 def write_to_private_sheet(
@@ -115,15 +115,37 @@ def write_to_private_sheet(
             ).execute()
 
     except HttpError as error:
-        print(error)
+        print(f"An error occurred: {error}")
+
+
+def create_new_sheet(title: str) -> str:
+    """Creates the Sheet the user has access to using credentials.json file."""
+    try:
+        service = build(
+            "sheets", "v4", credentials=authenticate_sheets_by_oauth_credentials()
+        )
+        spreadsheet = {"properties": {"title": title}}
+        spreadsheet = (
+            service.spreadsheets()
+            .create(body=spreadsheet, fields="spreadsheetId")
+            .execute()
+        )
+        print(f"Spreadsheet ID: {(spreadsheet.get('spreadsheetId'))}")
+        return "https://docs.google.com/spreadsheets/d/" + spreadsheet.get(
+            "spreadsheetId"
+        )
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return error
 
 
 if __name__ == "__main__":
-    cell_range = CELL_RANGE.format(sheet_name="Sheet1", cells="A1:D3")
-    print(get_public_sheet_values(SPREADSHEET_PUBLIC_ID, cell_range))
-    print(get_private_sheet_values(SPREADSHEET_PRIVATE_ID, cell_range))
-    print(
-        write_to_private_sheet(
-            SPREADSHEET_PRIVATE_ID, sheet_name="Sheet1", first_row=2, last_row=3
-        )
-    )
+    # cell_range = CELL_RANGE.format(sheet_name="Sheet1", cells="A1:D3")
+    # print(get_public_sheet_values(SPREADSHEET_PUBLIC_ID, cell_range))
+    # print(get_private_sheet_values(SPREADSHEET_PRIVATE_ID, cell_range))
+    # print(
+    #     write_to_private_sheet(
+    #         SPREADSHEET_PRIVATE_ID, sheet_name="Sheet1", first_row=2, last_row=3
+    #     )
+    # )
+    print(create_new_sheet("my brand new sheet 2"))
