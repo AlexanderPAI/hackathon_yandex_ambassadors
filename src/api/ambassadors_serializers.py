@@ -44,7 +44,6 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
     address = AddressSerializer(read_only=True)
     purpose = serializers.StringRelatedField(read_only=True)
     program = serializers.StringRelatedField(read_only=True)
-    group = serializers.StringRelatedField(read_only=True)
     tutor = serializers.StringRelatedField(read_only=True)
     status = serializers.StringRelatedField(read_only=True)
 
@@ -71,7 +70,6 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
             "status",
             "program",
             "address",
-            "group",
             "promocodes",
         )
 
@@ -79,7 +77,7 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
     def setup_eager_loading(cls, queryset):
         """Performs necessary eager loading of ambassadors data."""
         return queryset.select_related(
-            "tutor", "address", "status", "program", "purpose", "group"
+            "tutor", "address", "status", "program", "purpose"
         ).prefetch_related("activity", "promocodes")
 
 

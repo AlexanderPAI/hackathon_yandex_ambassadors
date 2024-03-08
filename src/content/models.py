@@ -14,7 +14,7 @@ class GuideTask(models.Model):
     }
     type = models.CharField(
         max_length=200,
-        verbose_name="Тип",
+        verbose_name="Тип таски",
         choices=GUIDE_TASK_TYPE,
     )
 
@@ -40,6 +40,7 @@ class GuideKit(models.Model):
         through_fields=("guide_kit", "task"),
         related_name="guide_kits",
         blank=True,
+        verbose_name='Таски в наборе'
     )
 
     class Meta:
