@@ -50,7 +50,7 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ambassador
         fields = (
-            "pk",
+            "id",
             "created",
             "name",
             "gender",
