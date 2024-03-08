@@ -36,7 +36,7 @@ class ProgramSerializer(serializers.ModelSerializer):
 class PurposeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purpose
-        fields = ("name",)
+        fields = ("name", "personal_purpose")
 
 
 class AmbassadorReadSerializer(serializers.ModelSerializer):
@@ -44,7 +44,6 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
     address = AddressSerializer(read_only=True)
     purpose = serializers.StringRelatedField(read_only=True)
     program = serializers.StringRelatedField(read_only=True)
-    group = serializers.StringRelatedField(read_only=True)
     tutor = serializers.StringRelatedField(read_only=True)
     status = serializers.StringRelatedField(read_only=True)
 
@@ -65,14 +64,12 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
             "activity",
             "blog_link",
             "onboarding_status",
-            "personal_purpose",
             "purpose",
             "about_me",
             "tutor",
             "status",
             "program",
             "address",
-            "group",
             "promocodes",
         )
 
@@ -80,7 +77,7 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
     def setup_eager_loading(cls, queryset):
         """Performs necessary eager loading of ambassadors data."""
         return queryset.select_related(
-            "tutor", "address", "status", "program", "purpose", "group"
+            "tutor", "address", "status", "program", "purpose"
         ).prefetch_related("activity", "promocodes")
 
 
@@ -104,7 +101,6 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
             "telegram_id",
             "activity",
             "blog_link",
-            "personal_purpose",
             "purpose",
             "about_me",
             "program",

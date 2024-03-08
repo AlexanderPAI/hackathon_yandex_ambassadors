@@ -1,33 +1,26 @@
 from django.db import models
+from django.utils.text import slugify
 
 from users.models import User
 
 
-class GroupPurposeProgramStatusBase(models.Model):
-    """Describes models base class Activity, Group, Purpose, Program and Status"""
-
-    slug = models.SlugField(max_length=50, unique=True, verbose_name="Slug")
-
-
-class Group(GroupPurposeProgramStatusBase):
-    """Describes Group entity"""
-
-    name = models.CharField(max_length=75, verbose_name="Название группы")
-
+class CommonAbstractModel(models.Model):
     class Meta:
-        verbose_name = "Группа"
-        verbose_name_plural = "Группы"
+        abstract = True
 
-    def __str__(self):
-        return self.name
+    slug = models.SlugField(max_length=75, unique=True, verbose_name="Slug")
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name, allow_unicode=True)
+        super().save(*args, **kwargs)
 
 
-class Purpose(GroupPurposeProgramStatusBase):
+class Purpose(CommonAbstractModel):
     """Describes Purpose entity"""
 
     name = models.CharField(max_length=75, verbose_name="Цель в Практикуме")
-
-    description = models.TextField(
+    personal_purpose = models.TextField(
         null=True, blank=True, verbose_name="Moя цель в Практикуме"
     )
 
@@ -39,7 +32,7 @@ class Purpose(GroupPurposeProgramStatusBase):
         return self.name
 
 
-class Program(GroupPurposeProgramStatusBase):
+class Program(CommonAbstractModel):
     """Describes Program entity"""
 
     name = models.CharField(max_length=75, verbose_name="Программа в Практикуме")
@@ -52,7 +45,7 @@ class Program(GroupPurposeProgramStatusBase):
         return self.name
 
 
-class Status(GroupPurposeProgramStatusBase):
+class Status(CommonAbstractModel):
     """Describes Status entity"""
 
     name = models.CharField(max_length=75, verbose_name="Статус")
@@ -65,7 +58,7 @@ class Status(GroupPurposeProgramStatusBase):
         return self.name
 
 
-class Activity(GroupPurposeProgramStatusBase):
+class Activity(CommonAbstractModel):
     """Describes Activity entity"""
 
     name = models.CharField(max_length=75, verbose_name="Цель Амбассадорства")
@@ -173,17 +166,8 @@ class Ambassador(models.Model):
         related_name="ambassadors",
         verbose_name="Цель в Практикуме",
     )
-    personal_purpose = models.TextField(
-        null=True, blank=True, verbose_name="Моя цель в Практикуме"
-    )
+
     about_me = models.TextField(null=True, blank=True, verbose_name="О себе")
-    group = models.ForeignKey(
-        Group,
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="ambassadors",
-    )
 
     class Meta:
         verbose_name = "Амбассадор"
