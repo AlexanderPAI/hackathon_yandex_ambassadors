@@ -187,6 +187,8 @@ class ContentPlatform(models.Model):
     slug = models.SlugField(
         unique=True,
         verbose_name="slug",
+        null=True,
+        blank=True,
     )
 
     class Meta:
