@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 
-from api.content_serializers import GuideSerialzier, GuideStatusSerializer, GuideKitSerializer, GuideTaskSerializer, GuideKitCreateUpdateSerializer
+from api.content_serializers import GuideSerializer, GuideCreateUpdateSerializer, GuideStatusSerializer, GuideKitSerializer, GuideTaskSerializer, GuideKitCreateUpdateSerializer
 from content.models import Guide, GuideKit, GuideStatus, GuideTask
 
 
@@ -30,4 +30,9 @@ class GuideStatusViewSet(ModelViewSet):
 class GuideViewSet(ModelViewSet):
     """Представление гайда."""
     queryset = Guide.objects.all()
-    serializer_class = GuideSerialzier
+    serializer_class = GuideSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'partial_update':
+            return GuideCreateUpdateSerializer
+        return GuideSerializer

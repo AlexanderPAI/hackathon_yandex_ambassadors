@@ -46,10 +46,13 @@ class GuideTaskGuideKitCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source="task.id", queryset=GuideTask.objects.all()
     )
+    type = serializers.ReadOnlyField(
+        source="task.type"
+    )
 
     class Meta:
         model = GuideTaskGuideKit
-        fields = ("id",)
+        fields = ("id", "type")
 
 
 class GuideKitCreateUpdateSerializer(serializers.ModelSerializer):
@@ -66,22 +69,25 @@ class GuideKitCreateUpdateSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        print(validated_data)
         tasks = validated_data.pop("connected_tasks")
         instance = super().create(validated_data)
-        print(tasks)
-        for data in tasks:
-            print(data)
-            GuideTaskGuideKit.objects.create(
-                guide_kit=instance, task=data["task"]["id"]
-            )
-        # GuideTaskGuideKit.objects.bulk_create(
-        #     GuideTaskGuideKit(
-        #         guide_kit=instance,
-        #         task=data['task'],
-        #     ) for data in tasks
-        # )
+        GuideTaskGuideKit.objects.bulk_create(
+            GuideTaskGuideKit(
+                guide_kit=instance,
+                task=data['task']["id"],
+            ) for data in tasks
+        )
         return instance
+
+    def update(self, instance, validated_data):
+        tasks = validated_data.pop("connected_tasks")
+        GuideTaskGuideKit.objects.filter(guide_kit=instance.id).delete()
+        for data in tasks:
+            GuideTaskGuideKit(
+                guide_kit=instance,
+                task=data['task']['id'],
+            ).save()
+        return super().update(instance, validated_data)
 
 
 class GuideStatusSerializer(serializers.ModelSerializer):
@@ -92,10 +98,21 @@ class GuideStatusSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class GuideSerialzier(serializers.ModelSerializer):
-    tasks = GuideTaskSerializer(many=True, source="guide_kit.tasks")
-    status = GuideStatusSerializer()
+class GuideSerializer(serializers.ModelSerializer):
+    """Сериализатор гайда."""
+    guide_kit = serializers.StringRelatedField()
+    tasks = GuideTaskSerializer(many=True, source="guide_kit.tasks", required=False)
+    status = serializers.ChoiceField(
+        choices=Guide.STATUS,
+    )
 
+    class Meta:
+        model = Guide
+        fields = "__all__"
+
+
+class GuideCreateUpdateSerializer(serializers.ModelSerializer):
+    """Сериализатор создания/обновления гайда."""
     class Meta:
         model = Guide
         fields = "__all__"
