@@ -8,6 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from .loggers import logger
 from .utils import YEAR_MONTHS
 
 # installed packages for Google Sheets API:
@@ -41,16 +42,20 @@ def get_public_sheet_values(sheet_id: str, cell_range: str) -> list[str]:
     return result.get("values", [])
 
 
-# TODO: add logger
 def authenticate_sheets_by_oauth_credentials():
     """Grants access to Google Sheets API using credentials.json file."""
     credentials = None
     if os.path.exists("token.json"):
+        logger.debug("token file exists.")
         credentials = Credentials.from_authorized_user_file("token.json", SCOPES)
     if not credentials or not credentials.valid:
         if credentials and credentials.expired and credentials.refresh_token:
+            logger.debug(
+                "credentials and credentials.expired and credentials.refresh_token."
+            )
             credentials.refresh(Request())
         else:
+            logger.debug("need to InstalledAppFlow.from_client_secrets_file")
             credentials_path = os.path.join(
                 Path(__file__).parent.parent, "credentials.json"
             )
@@ -74,7 +79,7 @@ def get_private_sheet_values(sheet_id: str, cell_range: str) -> list[str] | None
         values = result.get("values", [])
         return values
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        logger.error(f"An error occurred: {error}")
 
 
 def write_to_private_sheet(
@@ -100,7 +105,7 @@ def write_to_private_sheet(
                 .get("values")[0][0]
             )
             calculation_result = num1 + num2
-            print(f"Processing {num1} + {num2}")
+            logger.debug(f"Processing {num1} + {num2}")
 
             sheets.values().update(
                 spreadsheetId=sheet_id,
@@ -117,7 +122,7 @@ def write_to_private_sheet(
             ).execute()
 
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        logger.error(f"An error occurred: {error}")
 
 
 def create_new_sheet_example(title: str) -> str:
@@ -135,6 +140,7 @@ def create_new_sheet_example(title: str) -> str:
         )
         return spreadsheet.get("spreadsheetUrl")
     except HttpError as error:
+        logger.error(f"An error occurred: {error}")
         return error
 
 
@@ -216,7 +222,7 @@ def create_merch_applications_sheet(all_applications_qs) -> str:
 
         return spreadsheet.get("spreadsheetUrl")
     except HttpError as error:
-        print(error)
+        logger.error(f"An error occurred: {error}")
         return error
 
 
