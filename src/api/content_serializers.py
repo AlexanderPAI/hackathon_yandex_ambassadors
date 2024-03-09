@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from rest_framework import serializers
 
 from content.models import Guide, GuideKit, GuideStatus, GuideTask, GuideTaskGuideKit
@@ -46,9 +44,7 @@ class GuideTaskGuideKitCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source="task.id", queryset=GuideTask.objects.all()
     )
-    type = serializers.ReadOnlyField(
-        source="task.type"
-    )
+    type = serializers.ReadOnlyField(source="task.type")
 
     class Meta:
         model = GuideTaskGuideKit
@@ -74,8 +70,9 @@ class GuideKitCreateUpdateSerializer(serializers.ModelSerializer):
         GuideTaskGuideKit.objects.bulk_create(
             GuideTaskGuideKit(
                 guide_kit=instance,
-                task=data['task']["id"],
-            ) for data in tasks
+                task=data["task"]["id"],
+            )
+            for data in tasks
         )
         return instance
 
@@ -85,7 +82,7 @@ class GuideKitCreateUpdateSerializer(serializers.ModelSerializer):
         for data in tasks:
             GuideTaskGuideKit(
                 guide_kit=instance,
-                task=data['task']['id'],
+                task=data["task"]["id"],
             ).save()
         return super().update(instance, validated_data)
 
@@ -100,6 +97,7 @@ class GuideStatusSerializer(serializers.ModelSerializer):
 
 class GuideSerializer(serializers.ModelSerializer):
     """Сериализатор гайда."""
+
     guide_kit = serializers.StringRelatedField()
     tasks = GuideTaskSerializer(many=True, source="guide_kit.tasks", required=False)
     status = serializers.ChoiceField(
@@ -113,6 +111,7 @@ class GuideSerializer(serializers.ModelSerializer):
 
 class GuideCreateUpdateSerializer(serializers.ModelSerializer):
     """Сериализатор создания/обновления гайда."""
+
     class Meta:
         model = Guide
         fields = "__all__"
