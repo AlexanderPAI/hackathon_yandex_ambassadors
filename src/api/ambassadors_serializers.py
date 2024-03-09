@@ -11,6 +11,7 @@ from ambassadors.models import (
 
 
 class AddressSerializer(serializers.ModelSerializer):
+    """Serializer for Address model."""
     class Meta:
         model = Address
         fields = (
@@ -23,24 +24,28 @@ class AddressSerializer(serializers.ModelSerializer):
 
 
 class ActivitySerializer(serializers.ModelSerializer):
+    """Serializer for Activity model."""
     class Meta:
         model = Activity
         fields = ("id", "name",)
 
 
 class ProgramSerializer(serializers.ModelSerializer):
+    """Serializer for Program model"""
     class Meta:
         model = Program
         fields = ("id", "name",)
 
 
 class PurposeSerializer(serializers.ModelSerializer):
+    """Serializer for Purpose model"""
     class Meta:
         model = Purpose
         fields = ("id", "name", "personal_purpose",)
 
 
 class AmbassadorReadSerializer(serializers.ModelSerializer):
+    """Serializer for reading Ambassador model"""
     activity = ActivitySerializer(read_only=True, many=True)
     address = AddressSerializer(read_only=True)
     purpose = PurposeSerializer(read_only=True)
@@ -84,6 +89,7 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
 
 
 class AmbassadorCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating Ambassador model"""
     activity = ActivitySerializer(many=True)
     address = AddressSerializer(required=False)
     purpose = PurposeSerializer()
