@@ -144,6 +144,7 @@ class ReviewPlatformSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор отзыва."""
+    platform = serializers.SlugRelatedField(slug_field='slug', queryset=ReviewPlatform.objects.all())
 
     class Meta:
         model = Review
