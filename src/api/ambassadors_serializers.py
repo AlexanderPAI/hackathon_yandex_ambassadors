@@ -14,6 +14,7 @@ class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = (
+            "id",
             "postal_code",
             "country",
             "city",
@@ -24,19 +25,19 @@ class AddressSerializer(serializers.ModelSerializer):
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
-        fields = ("name",)
+        fields = ("id", "name",)
 
 
 class ProgramSerializer(serializers.ModelSerializer):
     class Meta:
         model = Program
-        fields = ("name",)
+        fields = ("id", "name",)
 
 
 class PurposeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purpose
-        fields = ("name", "personal_purpose")
+        fields = ("id", "name", "personal_purpose")
 
 
 class AmbassadorReadSerializer(serializers.ModelSerializer):
@@ -124,3 +125,6 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
             activity = Activity.objects.get_or_create(**activity)[0]
             AmbassadorActivity(ambassador=ambassador, activity=activity).save()
         return ambassador
+
+    def to_representation(self, instance):
+        return AmbassadorReadSerializer(instance, context=self.context).data
