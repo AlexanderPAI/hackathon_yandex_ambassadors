@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models import F, Prefetch, Sum
 from rest_framework import serializers
 
+from .utils import YEAR_MONTHS
 from ambassadors.models import Address, Ambassador, Status
 from promo.models import (
     Merch,
@@ -179,9 +180,9 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
         """Shows the total cost of the merch in the application (annotated field)."""
         return obj.merch_cost
 
-    def get_created_month(self, obj) -> int:
+    def get_created_month(self, obj) -> str:
         """Shows the merch application creation month."""
-        return obj.created.month
+        return YEAR_MONTHS[obj.created.month - 1][2]
 
 
 # TODO: drf-yasg shows incorrect merch field in response body - without taking into

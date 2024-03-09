@@ -29,24 +29,9 @@ from .promo_serializers import (
     PromocodeSerializer,
     YearBudgetSerializer,
 )
-from .utils import generate_application_number
+from .utils import YEAR_MONTHS, generate_application_number
 from ambassadors.models import Ambassador
 from promo.models import Merch, MerchApplication, MerchCategory, Promocode
-
-YEAR_MONTHS = [
-    ("january", 1),
-    ("february", 2),
-    ("march", 3),
-    ("april", 4),
-    ("may", 5),
-    ("june", 6),
-    ("july", 7),
-    ("august", 8),
-    ("september", 9),
-    ("october", 10),
-    ("november", 11),
-    ("december", 12),
-]
 
 year = openapi.Parameter(
     "year",
@@ -326,8 +311,8 @@ class MerchApplicationViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
     @action(methods=["get"], detail=False, filter_backends=[])
     def export_to_google_sheet(self, request):
         """Returns a link to Google sheet with information about sending merch."""
-        # all_applications_qs = self.get_queryset()
-        spreadsheet_link = create_merch_applications_sheet()
+        all_applications_qs = self.get_queryset()
+        spreadsheet_link = create_merch_applications_sheet(all_applications_qs)
         serializer = self.get_serializer_class()(
             data={"link": spreadsheet_link},
             context={"request": request, "format": self.format_kwarg, "view": self},
