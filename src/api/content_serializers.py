@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from rest_framework import serializers
 
-from content.models import Guide, GuideKit, GuideTask, GuideTaskGuideKit, GuideStatus
+from content.models import Guide, GuideKit, GuideStatus, GuideTask, GuideTaskGuideKit
 
 
 class GuideTaskSerializer(serializers.ModelSerializer):
@@ -10,7 +10,7 @@ class GuideTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GuideTask
-        fields = '__all__'
+        fields = "__all__"
 
 
 class GuideTaskGuideKitSerializer(serializers.ModelSerializer):
@@ -18,31 +18,33 @@ class GuideTaskGuideKitSerializer(serializers.ModelSerializer):
     Всмпомогательный сериализатор для переопределения
     полей id и type.
     """
-    id = serializers.ReadOnlyField(source='task.id')
-    type = serializers.ReadOnlyField(source='task.type')
+
+    id = serializers.ReadOnlyField(source="task.id")
+    type = serializers.ReadOnlyField(source="task.type")
 
     class Meta:
         model = GuideTaskGuideKit
         fields = (
-            'id',
-            'type',
+            "id",
+            "type",
         )
 
 
 class GuideKitSerializer(serializers.ModelSerializer):
     """Сериализатор набора задач для гайда."""
+
     tasks = GuideTaskSerializer(many=True)
 
     class Meta:
         model = GuideKit
-        fields = '__all__'
+        fields = "__all__"
 
 
 class GuideTaskGuideKitCreateSerializer(serializers.ModelSerializer):
     """Сериализатор для создания вспомогательной модели."""
+
     id = serializers.PrimaryKeyRelatedField(
-        source='task.id',
-        queryset=GuideTask.objects.all()
+        source="task.id", queryset=GuideTask.objects.all()
     )
 
     class Meta:
@@ -52,25 +54,26 @@ class GuideTaskGuideKitCreateSerializer(serializers.ModelSerializer):
 
 class GuideKitCreateUpdateSerializer(serializers.ModelSerializer):
     """Сериализатор для создания и обновления набора задач."""
-    tasks = GuideTaskGuideKitCreateSerializer(many=True)
+
+    tasks = GuideTaskGuideKitCreateSerializer(many=True, source="connected_tasks")
 
     class Meta:
         model = GuideKit
         fields = (
-            'id',
-            'name',
-            'tasks',
+            "id",
+            "name",
+            "tasks",
         )
 
     def create(self, validated_data):
         print(validated_data)
-        tasks = validated_data.pop('tasks')
+        tasks = validated_data.pop("connected_tasks")
         instance = super().create(validated_data)
         print(tasks)
         for data in tasks:
+            print(data)
             GuideTaskGuideKit.objects.create(
-                guide_kit=instance,
-                task=data["task"]["id"]
+                guide_kit=instance, task=data["task"]["id"]
             )
         # GuideTaskGuideKit.objects.bulk_create(
         #     GuideTaskGuideKit(
@@ -86,12 +89,13 @@ class GuideStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GuideStatus
-        fields = '__all__'
+        fields = "__all__"
+
 
 class GuideSerialzier(serializers.ModelSerializer):
-    tasks = GuideTaskSerializer(many=True, source='guide_kit.tasks')
+    tasks = GuideTaskSerializer(many=True, source="guide_kit.tasks")
     status = GuideStatusSerializer()
 
     class Meta:
         model = Guide
-        fields = '__all__'
+        fields = "__all__"
