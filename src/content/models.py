@@ -40,7 +40,7 @@ class GuideKit(models.Model):
         through_fields=("guide_kit", "task"),
         related_name="guide_kits",
         blank=True,
-        verbose_name='Таски в наборе'
+        verbose_name="Таски в наборе",
     )
 
     class Meta:
@@ -56,12 +56,10 @@ class GuideTaskGuideKit(models.Model):
     """Вспомогательная модель для M2M."""
 
     guide_kit = models.ForeignKey(
-        GuideKit,
-        on_delete=models.CASCADE,
+        GuideKit, on_delete=models.CASCADE, related_name="connected_tasks"
     )
     task = models.ForeignKey(
-        GuideTask,
-        on_delete=models.CASCADE,
+        GuideTask, on_delete=models.CASCADE, related_name="connected_tasks"
     )
 
 
