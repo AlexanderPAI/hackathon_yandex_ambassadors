@@ -5,12 +5,11 @@ from content.models import (
     ContentPlatform,
     Guide,
     GuideKit,
-    GuideStatus,
     GuideTask,
     GuideTaskGuideKit,
     MerchPhoto,
     Review,
-    ReviewPlatfrom,
+    ReviewPlatform,
 )
 
 
@@ -34,12 +33,6 @@ class GuideKitAdmin(admin.ModelAdmin):
     inlines = [GuideTasksInGuideKitsInLine]
 
 
-@admin.register(GuideStatus)
-class GuideStatusAdmin(admin.ModelAdmin):
-    list_display = ["id", "name", "slug"]
-    search_fields = ["name"]
-
-
 @admin.register(Guide)
 class GuideAdmin(admin.ModelAdmin):
 
@@ -57,7 +50,7 @@ class MerchPhotoAdmin(admin.ModelAdmin):
     list_display = ["id", "ambassador"]
 
 
-@admin.register(ReviewPlatfrom)
+@admin.register(ReviewPlatform)
 class ReviewPlatformAdmin(admin.ModelAdmin):
     list_display = ["id", "name", "slug"]
 

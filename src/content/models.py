@@ -63,33 +63,6 @@ class GuideTaskGuideKit(models.Model):
     )
 
 
-class GuideStatus(models.Model):
-    """Модель статуса гайда."""
-
-    name = models.CharField(
-        max_length=200,
-        verbose_name="Статус гайда",
-    )
-    slug = models.SlugField(
-        unique=True,
-        max_length=50,
-    )
-
-    class Meta:
-        verbose_name = "Статус гайда"
-        verbose_name_plural = "Статусы гайдов"
-        ordering = ["name"]
-
-    def save(self, *args, **kwargs):
-        "Автоматический slug."
-        if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-
 class Guide(models.Model):
     STATUS = {
         "pause": "На паузе",
@@ -147,7 +120,7 @@ class MerchPhoto(models.Model):
         return f"Фото {self.ambassador.name}"
 
 
-class ReviewPlatfrom(models.Model):
+class ReviewPlatform(models.Model):
     """Модель платформы отзыва."""
 
     name = models.CharField(
@@ -157,6 +130,8 @@ class ReviewPlatfrom(models.Model):
     slug = models.SlugField(
         unique=True,
         max_length=50,
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -184,7 +159,7 @@ class Review(models.Model):
         verbose_name="Амбассадор",
     )
     platform = models.ForeignKey(
-        ReviewPlatfrom,
+        ReviewPlatform,
         on_delete=models.CASCADE,
         related_name="reviews",
         verbose_name="Платформа",

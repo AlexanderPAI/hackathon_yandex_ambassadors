@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 
 from rest_framework import serializers
 
-from content.models import Guide, GuideKit, GuideStatus, GuideTask, GuideTaskGuideKit, MerchPhoto, ReviewPlatfrom, Review
+from content.models import Guide, GuideKit, GuideTask, GuideTaskGuideKit, MerchPhoto, ReviewPlatform, Review
 
 
 class GuideTaskSerializer(serializers.ModelSerializer):
@@ -92,14 +92,6 @@ class GuideKitCreateUpdateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class GuideStatusSerializer(serializers.ModelSerializer):
-    """Сериализатор статуса гайда."""
-
-    class Meta:
-        model = GuideStatus
-        fields = "__all__"
-
-
 class GuideSerializer(serializers.ModelSerializer):
     """Сериализатор гайда."""
     guide_kit = serializers.StringRelatedField()
@@ -146,7 +138,7 @@ class ReviewPlatformSerializer(serializers.ModelSerializer):
     """Сериализатор платформы для отзыва."""
 
     class Meta:
-        model = ReviewPlatfrom
+        model = ReviewPlatform
         fields = "__all__"
 
 
