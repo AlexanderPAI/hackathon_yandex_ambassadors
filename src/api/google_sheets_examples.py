@@ -118,21 +118,46 @@ def write_to_private_sheet(
         print(f"An error occurred: {error}")
 
 
-def create_new_sheet(title: str) -> str:
+def create_new_sheet_example(title: str) -> str:
     """Creates the Sheet the user has access to using credentials.json file."""
     try:
         service = build(
             "sheets", "v4", credentials=authenticate_sheets_by_oauth_credentials()
         )
-        spreadsheet = {"properties": {"title": title}}
+        spreadsheet_properties = {
+            "properties": {"title": title, "locale": "ru", "timeZone": "Europe/Moscow"},
+            "sheets": [{"properties": {"title": "Заявки на мерч"}}],
+        }
         spreadsheet = (
-            service.spreadsheets()
-            .create(body=spreadsheet, fields="spreadsheetId")
-            .execute()
+            service.spreadsheets().create(body=spreadsheet_properties).execute()
         )
-        return "https://docs.google.com/spreadsheets/d/" + spreadsheet.get(
-            "spreadsheetId"
+        return spreadsheet.get("spreadsheetUrl")
+    except HttpError as error:
+        return error
+
+
+def create_merch_applications_sheet() -> str:
+    """Creates new empty spreadsheet for merch applications."""
+
+    try:
+        service = build(
+            "sheets", "v4", credentials=authenticate_sheets_by_oauth_credentials()
         )
+        sheets = service.spreadsheets()
+        worksheet_name = "Заявки на мерч"
+        spreadsheet_properties = {
+            "properties": {
+                "title": "Отправка мерча",
+                "locale": "ru",
+                "timeZone": "Europe/Moscow",
+            },
+            "sheets": [{"properties": {"title": worksheet_name}}],
+        }
+        spreadsheet = sheets.create(body=spreadsheet_properties).execute()
+        spreadsheet_id = spreadsheet.get("spreadsheetId")
+        merch_apps_spreadsheet = sheets.get(spreadsheetId=spreadsheet_id).execute()
+        print(merch_apps_spreadsheet)
+        return spreadsheet.get("spreadsheetUrl")
     except HttpError as error:
         return error
 
@@ -146,4 +171,4 @@ if __name__ == "__main__":
     #         SPREADSHEET_PRIVATE_ID, sheet_name="Sheet1", first_row=2, last_row=3
     #     )
     # )
-    print(create_new_sheet("my brand new sheet"))
+    print(create_new_sheet_example("Отправка мерча"))

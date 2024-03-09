@@ -321,3 +321,9 @@ class DestroyObjectSuccessSerializer(serializers.Serializer):
     """Serializer to provide json response after objects deletion."""
 
     message = serializers.CharField()
+
+
+class GoogleSheetAPISerializer(serializers.Serializer):
+    """Serializer for link to Google Sheet."""
+
+    link = serializers.URLField()
