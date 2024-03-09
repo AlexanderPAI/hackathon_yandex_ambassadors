@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 
 from rest_framework import serializers
 
-from content.models import Guide, GuideKit, GuideStatus, GuideTask, GuideTaskGuideKit, MerchPhoto
+from content.models import Guide, GuideKit, GuideStatus, GuideTask, GuideTaskGuideKit, MerchPhoto, ReviewPlatfrom, Review
 
 
 class GuideTaskSerializer(serializers.ModelSerializer):
@@ -134,8 +134,27 @@ class Base64ImageField(serializers.ImageField):
 
 
 class MerchPhotoSerializer(serializers.ModelSerializer):
+    """Сериализатор для Фото в мерче."""
     photo = Base64ImageField()
 
     class Meta:
         model = MerchPhoto
         fields = "__all__"
+
+
+class ReviewPlatformSerializer(serializers.ModelSerializer):
+    """Сериализатор платформы для отзыва."""
+
+    class Meta:
+        model = ReviewPlatfrom
+        fields = "__all__"
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор отзыва."""
+
+    class Meta:
+        model = Review
+        fields = "__all__"
+
+
