@@ -1,5 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 
+from .mixins import DestroyWithPayloadMixin
 from ambassadors.models import Ambassador
 from api.ambassadors_serializers import (
     AmbassadorCreateSerializer,
@@ -7,7 +8,7 @@ from api.ambassadors_serializers import (
 )
 
 
-class AmbassadorViewSet(ModelViewSet):
+class AmbassadorViewSet(DestroyWithPayloadMixin, ModelViewSet):
     queryset = Ambassador.objects.all()
     serializer_class = AmbassadorReadSerializer
 

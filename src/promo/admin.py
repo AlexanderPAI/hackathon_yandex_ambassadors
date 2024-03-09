@@ -61,7 +61,6 @@ class MerchApplicationAdmin(admin.ModelAdmin):
         return (
             queryset.select_related(
                 "ambassador__program",
-                "ambassador__group",
                 "ambassador__status",
                 "ambassador__purpose",
                 "ambassador__tutor",

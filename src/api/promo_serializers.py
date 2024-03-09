@@ -315,3 +315,9 @@ class PromocodeCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Promocode
         fields = ["id", "code", "created", "is_active", "ambassador"]
+
+
+class DestroyObjectSuccessSerializer(serializers.Serializer):
+    """Serializer to provide json response after objects deletion."""
+
+    message = serializers.CharField()
