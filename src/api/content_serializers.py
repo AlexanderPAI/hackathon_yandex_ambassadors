@@ -1,8 +1,10 @@
+import base64
 from collections import OrderedDict
+from django.core.files.base import ContentFile
 
 from rest_framework import serializers
 
-from content.models import Guide, GuideKit, GuideStatus, GuideTask, GuideTaskGuideKit
+from content.models import Guide, GuideKit, GuideStatus, GuideTask, GuideTaskGuideKit, MerchPhoto
 
 
 class GuideTaskSerializer(serializers.ModelSerializer):
@@ -115,4 +117,25 @@ class GuideCreateUpdateSerializer(serializers.ModelSerializer):
     """Сериализатор создания/обновления гайда."""
     class Meta:
         model = Guide
+        fields = "__all__"
+
+
+class Base64ImageField(serializers.ImageField):
+    """Сериазитор для декодирования изображения."""
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith("data:image"):
+            format, imgstr = data.split(";base64")
+            ext = format.split("/")[-1]
+            data = ContentFile(
+                base64.b64decode(imgstr),
+                name='temp.' + ext
+            )
+            return super().to_internal_value(data)
+
+
+class MerchPhotoSerializer(serializers.ModelSerializer):
+    photo = Base64ImageField()
+
+    class Meta:
+        model = MerchPhoto
         fields = "__all__"
