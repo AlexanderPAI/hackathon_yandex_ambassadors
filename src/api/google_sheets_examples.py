@@ -169,7 +169,8 @@ def create_merch_applications_sheet(all_applications_qs) -> str:
                 "id заявки",
                 "номер заявки",
                 "куратор",
-                "мерч",
+                "название мерча",
+                "размер",
                 "количество",
                 "размер толстовки",
                 "размер носков",
@@ -195,14 +196,30 @@ def create_merch_applications_sheet(all_applications_qs) -> str:
         all_applications_list = list(all_applications_qs)
         for row in range(2, len(all_applications_list) + 2):
             item = all_applications_list.pop()
+            merch_inside = item.merch_in_applications.all()
+            if not merch_inside:
+                logger.error("Application without merch items inside")
+
+            merch_name = (
+                item.merch_in_applications.all()[0].merch.name
+                if merch_inside
+                else "Заявка без мерча"
+            )
+            merch_size = (
+                item.merch_in_applications.all()[0].merch.size if merch_inside else "-"
+            )
+            merch_quantity = (
+                item.merch_in_applications.all()[0].quantity if merch_inside else 0
+            )
 
             values = [
                 (
                     item.id,
                     item.application_number,
                     item.tutor.get_full_name(),
-                    item.merch_in_applications.all()[0].merch.name,
-                    item.merch_in_applications.all()[0].quantity,
+                    merch_name,
+                    merch_size,
+                    merch_quantity,
                     item.ambassador.clothing_size,
                     item.ambassador.shoe_size,
                     item.ambassador.name,
