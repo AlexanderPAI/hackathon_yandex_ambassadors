@@ -161,6 +161,8 @@ def create_merch_applications_sheet(all_applications_qs) -> str:
             "sheets": [{"properties": {"title": worksheet_name}}],
         }
         spreadsheet = sheets.create(body=spreadsheet_properties).execute()
+        logger.debug("Empty spreadsheet for merch applications created")
+
         spreadsheet_id = spreadsheet.get("spreadsheetId")
         column_names = [
             (
@@ -188,6 +190,7 @@ def create_merch_applications_sheet(all_applications_qs) -> str:
             range=f"{worksheet_name}!A1",
             body=value_range_body,
         ).execute()
+        logger.debug("Column names inserted into the spreadsheet")
 
         all_applications_list = list(all_applications_qs)
         for row in range(2, len(all_applications_list) + 2):
@@ -212,12 +215,16 @@ def create_merch_applications_sheet(all_applications_qs) -> str:
                     YEAR_MONTHS[item.created.month - 1][2],
                 )
             ]
-            sheets.values().update(
-                spreadsheetId=spreadsheet_id,
-                valueInputOption="RAW",
-                range=f"{worksheet_name}!A{row}",
-                body={"values": values},
-            ).execute()
+            try:
+                sheets.values().update(
+                    spreadsheetId=spreadsheet_id,
+                    valueInputOption="RAW",
+                    range=f"{worksheet_name}!A{row}",
+                    body={"values": values},
+                ).execute()
+            except Exception as e:
+                logger.error(f"item - {item}, error - {str(e)}")
+                raise e
 
         return spreadsheet.get("spreadsheetUrl")
     except HttpError as error:
@@ -242,6 +249,8 @@ def create_promocodes_sheet(all_promocodes_qs) -> str:
             "sheets": [{"properties": {"title": worksheet_name}}],
         }
         spreadsheet = sheets.create(body=spreadsheet_properties).execute()
+        logger.debug("Empty spreadsheet for merch applications created")
+
         spreadsheet_id = spreadsheet.get("spreadsheetId")
         column_names = [
             (
@@ -260,6 +269,7 @@ def create_promocodes_sheet(all_promocodes_qs) -> str:
             range=f"{worksheet_name}!A1",
             body=value_range_body,
         ).execute()
+        logger.debug("Column names inserted into the spreadsheet")
 
         all_promocodes_qs = list(all_promocodes_qs)
         for row in range(2, len(all_promocodes_qs) + 2):
@@ -275,12 +285,16 @@ def create_promocodes_sheet(all_promocodes_qs) -> str:
                     item.ambassador.telegram_id,
                 )
             ]
-            sheets.values().update(
-                spreadsheetId=spreadsheet_id,
-                valueInputOption="RAW",
-                range=f"{worksheet_name}!A{row}",
-                body={"values": values},
-            ).execute()
+            try:
+                sheets.values().update(
+                    spreadsheetId=spreadsheet_id,
+                    valueInputOption="RAW",
+                    range=f"{worksheet_name}!A{row}",
+                    body={"values": values},
+                ).execute()
+            except Exception as e:
+                logger.error(f"item - {item}, error - {str(e)}")
+                raise e
 
         return spreadsheet.get("spreadsheetUrl")
     except HttpError as error:
