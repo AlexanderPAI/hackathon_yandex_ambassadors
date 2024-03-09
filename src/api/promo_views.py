@@ -14,8 +14,10 @@ from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
 from .filters import MerchApplicationsFilter, MerchFilter, PromocodeFilter
+from .mixins import DestroyWithPayloadMixin
 from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
+    DestroyObjectSuccessSerializer,
     MerchApplicationCreateUpdateSerializer,
     MerchApplicationSerializer,
     MerchCategorySerializer,
@@ -163,7 +165,7 @@ ambassadors = openapi.Parameter(
     decorator=swagger_auto_schema(
         operation_summary="Delete merch application",
         responses={
-            204: "",
+            200: DestroyObjectSuccessSerializer,
             401: ErrorResponse401Serializer,
             403: ErrorResponse403Serializer,
             404: ErrorResponse404Serializer,
@@ -178,7 +180,7 @@ ambassadors = openapi.Parameter(
         manual_parameters=[year, ambassadors],
     ),
 )
-class MerchApplicationViewSet(viewsets.ModelViewSet):
+class MerchApplicationViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
     """
     ViewSet for merch applications and annual merch budgets.
     By default, sorting is done by ID.
@@ -357,13 +359,13 @@ class MerchApplicationViewSet(viewsets.ModelViewSet):
     decorator=swagger_auto_schema(
         operation_summary="Delete merch category",
         responses={
-            204: "",
+            200: DestroyObjectSuccessSerializer,
             401: ErrorResponse401Serializer,
             404: ErrorResponse404Serializer,
         },
     ),
 )
-class MerchCategoryViewSet(viewsets.ModelViewSet):
+class MerchCategoryViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
     """ViewSet for categories of merch."""
 
     http_method_names = ["get", "post", "patch", "delete"]
@@ -461,13 +463,13 @@ class MerchCategoryViewSet(viewsets.ModelViewSet):
     decorator=swagger_auto_schema(
         operation_summary="Delete merch",
         responses={
-            204: "",
+            200: DestroyObjectSuccessSerializer,
             401: ErrorResponse401Serializer,
             404: ErrorResponse404Serializer,
         },
     ),
 )
-class MerchViewSet(viewsets.ModelViewSet):
+class MerchViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
     """
     ViewSet for merch species.
     Basic items sorting is carried out by ID.
@@ -583,13 +585,13 @@ class MerchViewSet(viewsets.ModelViewSet):
     decorator=swagger_auto_schema(
         operation_summary="Delete promocode",
         responses={
-            204: "",
+            200: DestroyObjectSuccessSerializer,
             401: ErrorResponse401Serializer,
             404: ErrorResponse404Serializer,
         },
     ),
 )
-class PromocodeViewSet(viewsets.ModelViewSet):
+class PromocodeViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
     """
     ViewSet for promocodes.
     By default, sorting is done by ID.
