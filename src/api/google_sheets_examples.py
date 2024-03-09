@@ -145,8 +145,7 @@ def create_new_sheet_example(title: str) -> str:
 
 
 def create_merch_applications_sheet(all_applications_qs) -> str:
-    """Creates new empty spreadsheet for merch applications."""
-
+    """Creates a new spreadsheet and writes a list of merch applications into it."""
     try:
         service = build(
             "sheets", "v4", credentials=authenticate_sheets_by_oauth_credentials()
@@ -211,6 +210,69 @@ def create_merch_applications_sheet(all_applications_qs) -> str:
                     item.ambassador.phone_number,
                     item.created.isoformat(),
                     YEAR_MONTHS[item.created.month - 1][2],
+                )
+            ]
+            sheets.values().update(
+                spreadsheetId=spreadsheet_id,
+                valueInputOption="RAW",
+                range=f"{worksheet_name}!A{row}",
+                body={"values": values},
+            ).execute()
+
+        return spreadsheet.get("spreadsheetUrl")
+    except HttpError as error:
+        logger.error(f"An error occurred: {error}")
+        return error
+
+
+def create_promocodes_sheet(all_promocodes_qs) -> str:
+    """Creates a new spreadsheet and writes a list of promocodes into it."""
+    try:
+        service = build(
+            "sheets", "v4", credentials=authenticate_sheets_by_oauth_credentials()
+        )
+        sheets = service.spreadsheets()
+        worksheet_name = "Промокоды"
+        spreadsheet_properties = {
+            "properties": {
+                "title": "Список промокодов",
+                "locale": "ru",
+                "timeZone": "Europe/Moscow",
+            },
+            "sheets": [{"properties": {"title": worksheet_name}}],
+        }
+        spreadsheet = sheets.create(body=spreadsheet_properties).execute()
+        spreadsheet_id = spreadsheet.get("spreadsheetId")
+        column_names = [
+            (
+                "id промокода",
+                "промокод",
+                "активный промокод",
+                "амбассадор",
+                "статус амбассадора",
+                "телеграм амбассадора",
+            )
+        ]
+        value_range_body = {"majorDimension": "ROWS", "values": column_names}
+        sheets.values().update(
+            spreadsheetId=spreadsheet_id,
+            valueInputOption="RAW",
+            range=f"{worksheet_name}!A1",
+            body=value_range_body,
+        ).execute()
+
+        all_promocodes_qs = list(all_promocodes_qs)
+        for row in range(2, len(all_promocodes_qs) + 2):
+            item = all_promocodes_qs.pop()
+
+            values = [
+                (
+                    item.id,
+                    item.code,
+                    item.is_active,
+                    item.ambassador.name,
+                    item.ambassador.status.name,
+                    item.ambassador.telegram_id,
                 )
             ]
             sheets.values().update(

@@ -14,7 +14,10 @@ from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
 from .filters import MerchApplicationsFilter, MerchFilter, PromocodeFilter
-from .google_sheets_examples import create_merch_applications_sheet
+from .google_sheets_examples import (
+    create_merch_applications_sheet,
+    create_promocodes_sheet,
+)
 from .mixins import DestroyWithPayloadMixin
 from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
@@ -602,6 +605,13 @@ class MerchViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
         },
     ),
 )
+@method_decorator(
+    name="export_to_google_sheet",
+    decorator=swagger_auto_schema(
+        operation_summary="Export to Google sheet",
+        responses={200: GoogleSheetAPISerializer},
+    ),
+)
 class PromocodeViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
     """
     ViewSet for promocodes.
@@ -632,6 +642,23 @@ class PromocodeViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
         return PromocodeSerializer.setup_eager_loading(Promocode.objects.all())
 
     def get_serializer_class(self):
+        if self.action == "export_to_google_sheet":
+            return GoogleSheetAPISerializer
         if self.action in ["create", "partial_update"]:
             return PromocodeCreateUpdateSerializer
         return PromocodeSerializer
+
+    @action(methods=["get"], detail=False, filter_backends=[])
+    def export_to_google_sheet(self, request):
+        """Returns a link to Google sheet with information about promocodes."""
+        all_promocodes_qs = self.get_queryset()
+        spreadsheet_link = create_promocodes_sheet(all_promocodes_qs)
+        serializer = self.get_serializer_class()(
+            data={"link": spreadsheet_link},
+            context={"request": request, "format": self.format_kwarg, "view": self},
+        )
+        if not serializer.is_valid():
+            return response.Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
