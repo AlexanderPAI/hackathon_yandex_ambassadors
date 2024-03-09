@@ -59,7 +59,7 @@ def authenticate_sheets_by_oauth_credentials():
     return credentials
 
 
-def get_private_sheet_values(sheet_id: str, cell_range: str) -> list[str]:
+def get_private_sheet_values(sheet_id: str, cell_range: str) -> list[str] | None:
     """
     Returns values from a selected range of cells in a private spreadsheet using OAuth.
     """
@@ -130,12 +130,10 @@ def create_new_sheet(title: str) -> str:
             .create(body=spreadsheet, fields="spreadsheetId")
             .execute()
         )
-        print(f"Spreadsheet ID: {(spreadsheet.get('spreadsheetId'))}")
         return "https://docs.google.com/spreadsheets/d/" + spreadsheet.get(
             "spreadsheetId"
         )
     except HttpError as error:
-        print(f"An error occurred: {error}")
         return error
 
 
@@ -148,4 +146,4 @@ if __name__ == "__main__":
     #         SPREADSHEET_PRIVATE_ID, sheet_name="Sheet1", first_row=2, last_row=3
     #     )
     # )
-    print(create_new_sheet("my brand new sheet 2"))
+    print(create_new_sheet("my brand new sheet"))
