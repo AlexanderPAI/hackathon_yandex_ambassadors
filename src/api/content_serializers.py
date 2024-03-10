@@ -287,12 +287,12 @@ class ContentPageSerialzier(serializers.ModelSerializer):
             return 2
         return 2
 
-    # def get_guide_status(self, obj):
-    #     try:
-    #         guide = Guide.objects.get(ambassador=obj)
-    #         return guide.status
-    #     except:
-    #         return "There is no guide"
+    def get_guide_status(self, obj):
+        try:
+            guide = Guide.objects.get(ambassador=obj)
+            return guide.status
+        except:
+            return "There is no guide"
 
 
 # class ContentPageUpdateSerializer(ContentPageSerialzier):
