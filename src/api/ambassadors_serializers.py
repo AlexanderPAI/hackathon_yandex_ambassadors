@@ -25,13 +25,19 @@ class AddressSerializer(serializers.ModelSerializer):
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
-        fields = ("id", "name",)
+        fields = (
+            "id",
+            "name",
+        )
 
 
 class ProgramSerializer(serializers.ModelSerializer):
     class Meta:
         model = Program
-        fields = ("id", "name",)
+        fields = (
+            "id",
+            "name",
+        )
 
 
 class PurposeSerializer(serializers.ModelSerializer):

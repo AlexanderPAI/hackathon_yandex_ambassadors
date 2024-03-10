@@ -1,44 +1,47 @@
 import base64
-from collections import OrderedDict
-from django.core.files.base import ContentFile
 
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 from ambassadors.models import Ambassador
-from content.models import Content, Guide, GuideKit, GuideTask, GuideTaskGuideKit, MerchPhoto
+from content.models import (
+    Content,
+    Guide,
+    GuideKit,
+    GuideTask,
+    GuideTaskGuideKit,
+    MerchPhoto,
+)
 
 
 def get_platfrom(link):
     platform = link[:]
-    if '//' in platform:
-        platform = platform.split('//')[1].split('/')
-        if 'www.' in platform[0]:
-            platform[0] = platform[0].replace('www.', '')
-        if 'yandex' in platform[0] or 'google' in platform[0]:
-            platform = platform[0] + '/' + platform[1]
-        else:
-            platform = platform[0]
-    else:
-        platform = platform.split('/')[0]
-    return platform
+    if "//" in platform:
+        platform = platform.split("//")[1].split("/")
+        if "www." in platform[0]:
+            platform[0] = platform[0].replace("www.", "")
+        if "yandex" in platform[0] or "google" in platform[0]:
+            return platform[0] + "/" + platform[1]
+        return platform[0]
+    return platform.split("/")[0]
 
 
 def get_type(platform):
     reviews_platforms = [
-            'career.habr.com',
-            'sravni.ru',
-            'tutortop.ru',
-            'irecommend.ru',
-            'journal.tinkoff.ru',
-            'mooc.ru',
-            'katalog-kursov.ru',
-            'otzovik.com',
-            'yandex.ru/maps/',
-            'google.com/maps',
-        ]
+        "career.habr.com",
+        "sravni.ru",
+        "tutortop.ru",
+        "irecommend.ru",
+        "journal.tinkoff.ru",
+        "mooc.ru",
+        "katalog-kursov.ru",
+        "otzovik.com",
+        "yandex.ru/maps/",
+        "google.com/maps",
+    ]
     if platform in reviews_platforms:
-        return 'review'
-    return 'content'
+        return "review"
+    return "content"
 
 
 class GuideTaskSerializer(serializers.ModelSerializer):
@@ -82,9 +85,7 @@ class GuideTaskGuideKitCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source="task.id", queryset=GuideTask.objects.all()
     )
-    type = serializers.ReadOnlyField(
-        source="task.type"
-    )
+    type = serializers.ReadOnlyField(source="task.type")
 
     class Meta:
         model = GuideTaskGuideKit
@@ -110,8 +111,9 @@ class GuideKitCreateUpdateSerializer(serializers.ModelSerializer):
         GuideTaskGuideKit.objects.bulk_create(
             GuideTaskGuideKit(
                 guide_kit=instance,
-                task=data['task']["id"],
-            ) for data in tasks
+                task=data["task"]["id"],
+            )
+            for data in tasks
         )
         return instance
 
@@ -121,13 +123,14 @@ class GuideKitCreateUpdateSerializer(serializers.ModelSerializer):
         for data in tasks:
             GuideTaskGuideKit(
                 guide_kit=instance,
-                task=data['task']['id'],
+                task=data["task"]["id"],
             ).save()
         return super().update(instance, validated_data)
 
 
 class GuideSerializer(serializers.ModelSerializer):
     """Сериализатор гайда."""
+
     guide_kit = serializers.StringRelatedField()
     tasks = GuideTaskSerializer(many=True, source="guide_kit.tasks", required=False)
     status = serializers.ChoiceField(
@@ -141,6 +144,7 @@ class GuideSerializer(serializers.ModelSerializer):
 
 class GuideCreateUpdateSerializer(serializers.ModelSerializer):
     """Сериализатор создания/обновления гайда."""
+
     class Meta:
         model = Guide
         fields = "__all__"
@@ -148,19 +152,18 @@ class GuideCreateUpdateSerializer(serializers.ModelSerializer):
 
 class Base64ImageField(serializers.ImageField):
     """Сериазитор для декодирования изображения."""
+
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith("data:image"):
             format, imgstr = data.split(";base64")
             ext = format.split("/")[-1]
-            data = ContentFile(
-                base64.b64decode(imgstr),
-                name='temp.' + ext
-            )
-            return super().to_internal_value(data)
+            data = ContentFile(base64.b64decode(imgstr), name="temp." + ext)
+        return super().to_internal_value(data)
 
 
 class MerchPhotoSerializer(serializers.ModelSerializer):
     """Сериализатор для Фото в мерче."""
+
     photo = Base64ImageField()
 
     class Meta:
@@ -170,6 +173,8 @@ class MerchPhotoSerializer(serializers.ModelSerializer):
 
 class ContentSerializer(serializers.ModelSerializer):
     """Сериализтор контента."""
+
+    image = Base64ImageField()
 
     class Meta:
         model = Content
@@ -181,11 +186,14 @@ class ContentSerializer(serializers.ModelSerializer):
             "ambassador",
             "platform",
             "type",
+            "image",
         )
 
 
 class ContentCreateUpdateSerializer(serializers.ModelSerializer):
     """Сериализатор создания контента."""
+
+    image = Base64ImageField()
 
     class Meta:
         model = Content
@@ -196,24 +204,24 @@ class ContentCreateUpdateSerializer(serializers.ModelSerializer):
             "is_guide_content",
             "ambassador",
             "platform",
-            "type"
+            "type",
+            "image",
         )
 
     def create(self, validated_data):
-        link = validated_data['link']
+        link = validated_data["link"]
         platform = get_platfrom(link)
         type = get_type(platform)
-        content = Content.objects.create(
+        return Content.objects.create(
             **validated_data,
             platform=platform,
             type=type,
         )
-        return content
-
 
 
 class ContentPageSerialzier(serializers.ModelSerializer):
     """Сериализатор для страницы Контент."""
+
     review = serializers.SerializerMethodField()
     content = serializers.SerializerMethodField()
 
@@ -227,13 +235,13 @@ class ContentPageSerialzier(serializers.ModelSerializer):
         )
 
     def get_review(self, obj):
-        review = obj.content.filter(type='review')
+        review = obj.content.filter(type="review")
         if review:
             return review[0].link
-        return 'Еще нет отзывов'
+        return "Еще нет отзывов"
 
     def get_content(self, obj):
-        content = obj.content.filter(type='content')
+        content = obj.content.filter(type="content")
         if content:
             return content[0].link
-        return 'Еще нет контента'
+        return "Еще нет контента"

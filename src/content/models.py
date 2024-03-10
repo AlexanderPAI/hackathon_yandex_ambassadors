@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.text import slugify
 
 from ambassadors.models import Ambassador
 
@@ -122,9 +121,10 @@ class MerchPhoto(models.Model):
 
 class Content(models.Model):
     """Модель контента."""
+
     TYPES = {
-        'review': 'Отзыв',
-        'content': 'Контент',
+        "review": "Отзыв",
+        "content": "Контент",
     }
     ambassador = models.ForeignKey(
         Ambassador,
@@ -146,55 +146,30 @@ class Content(models.Model):
     )
     platform = models.CharField(
         max_length=200,
-        verbose_name='Платформа',
+        verbose_name="Платформа",
         null=True,
     )
     type = models.CharField(
         max_length=200,
         choices=TYPES,
-        verbose_name='Тип (отзыв/контент)',
         null=True,
+        verbose_name="Тип (отзыв/контент)",
     )
     image = models.ImageField(
-        upload_to='content/',
-        default='None',
+        upload_to="content/",
+        default="None",
+        verbose_name="Изображение",
+    )
+    comment = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Комментарий",
     )
 
     class Meta:
         verbose_name = "Контент"
         verbose_name_plural = "Контент"
         ordering = ["-created"]
-
-    # @property
-    # def platform(self):
-    #     platform = self.link[:]
-    #     if '//' in self.link:
-    #         platform = platform.split('//')[1].split('/')
-    #         if 'www.' in platform[0]:
-    #             platform[0] = platform[0].replace('www.', '')
-    #         if 'yandex' in platform[0] or 'google' in platform[0]:
-    #             platform = platform[0] + '/' + platform[1]
-    #     else:
-    #         platform = platform.split('/')[0]
-    #     return platform
-    #
-    # def type(self):
-    #     reviews_platforms = [
-    #         'career.habr.com',
-    #         'sravni.ru',
-    #         'tutortop.ru',
-    #         'irecommend.ru',
-    #         'journal.tinkoff.ru',
-    #         'mooc.ru',
-    #         'katalog-kursov.ru',
-    #         'otzovik.com',
-    #         'yandex.ru/maps/',
-    #         'google.com/maps',
-    #     ]
-    #     if self.platform in reviews_platforms:
-    #         return 'review'
-    #     return 'content'
-
 
     def __str__(self):
         return f"{self.ambassador.name} на {self.platform}"
