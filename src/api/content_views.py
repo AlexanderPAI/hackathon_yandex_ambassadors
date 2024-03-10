@@ -63,9 +63,16 @@ class ContentViewSet(DestroyWithPayloadMixin, ModelViewSet):
     serializer_class = ContentSerializer
 
     def get_queryset(self):
-        ambassador = self.request.query_params.get("ambassador")
-        if ambassador:
-            return Content.objects.filter(ambassador=ambassador)
+        params = self.request.query_params
+        if "ambassador" in params:
+            if "is_guide_content" in params:
+                return Content.objects.filter(
+                    is_guide_content=params["is_guide_content"],
+                    ambassador=params["ambassador"],
+                )
+            return Content.objects.filter(
+                    ambassador=params["ambassador"],
+                )
         return Content.objects.all()
 
     def get_serializer_class(self):
