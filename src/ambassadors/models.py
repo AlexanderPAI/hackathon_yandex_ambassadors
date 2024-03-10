@@ -162,25 +162,22 @@ class Ambassador(models.Model):
         related_name="ambassadors",
         verbose_name="Программа в Практикуме",
     )
-    purpose = models.ForeignKey(
+    purpose = models.ManyToManyField(
         Purpose,
-        on_delete=models.PROTECT,
-        null=True,
-        blank=False,
+        through="AmbassadorPurpose",
         related_name="ambassadors",
         verbose_name="Цель в Практикуме",
     )
 
     about_me = models.TextField(null=True, blank=True, verbose_name="О себе")
+    comment = models.TextField(null=True, blank=True, verbose_name="Комментарий")
 
     class Meta:
         verbose_name = "Амбассадор"
         verbose_name_plural = "Амбассадоры"
 
     def __str__(self):
-        return (
-            f"{self.name} ({self.status}) {self.tutor} {self.program} " f"{self.email}"
-        )
+        return f"{self.name} ({self.status}) {self.tutor} {self.program} {self.email}"
 
 
 class AmbassadorActivity(models.Model):
@@ -194,3 +191,11 @@ class AmbassadorActivity(models.Model):
         Activity,
         on_delete=models.CASCADE,
     )
+
+
+class AmbassadorPurpose(models.Model):
+    """Describe Ambassador and Purpose relations"""
+
+    ambassador = models.ForeignKey(Ambassador, on_delete=models.CASCADE)
+
+    purpose = models.ForeignKey(Purpose, on_delete=models.CASCADE)

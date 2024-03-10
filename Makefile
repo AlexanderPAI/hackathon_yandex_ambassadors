@@ -75,3 +75,6 @@ prune-containers:
 
 prune-images:
 	sudo docker image prune
+
+pytest-ambassadors:
+	pytest -v src/tests/api_tests/test_ambassadors.py
