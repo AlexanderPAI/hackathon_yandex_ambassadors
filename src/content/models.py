@@ -163,7 +163,6 @@ class Content(models.Model):
         verbose_name="Изображение",
     )
 
-
     class Meta:
         verbose_name = "Контент"
         verbose_name_plural = "Контент"

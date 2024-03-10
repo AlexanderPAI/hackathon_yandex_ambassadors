@@ -208,11 +208,11 @@ class ContentUpdateSerializer(serializers.ModelSerializer):
             "image",
         )
 
-# Перенести в Create
+    # Перенести в Create
     def create(self, validated_data):
         is_guide_content = False
         is_guide_content_field = validated_data.pop("is_guide_content")
-        if is_guide_content_field == 'Да':
+        if is_guide_content_field == "Да":
             is_guide_content = True
         link = validated_data["link"]
         platform = get_content_platfrom(link)

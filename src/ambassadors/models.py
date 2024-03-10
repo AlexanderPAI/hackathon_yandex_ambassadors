@@ -177,9 +177,7 @@ class Ambassador(models.Model):
         verbose_name_plural = "Амбассадоры"
 
     def __str__(self):
-        return (
-            f"{self.name} ({self.status}) {self.tutor} {self.program} {self.email}"
-        )
+        return f"{self.name} ({self.status}) {self.tutor} {self.program} {self.email}"
 
 
 class AmbassadorActivity(models.Model):
@@ -198,10 +196,6 @@ class AmbassadorActivity(models.Model):
 class AmbassadorPurpose(models.Model):
     """Describe Ambassador and Purpose relations"""
 
-    ambassador = models.ForeignKey(
-        Ambassador, on_delete=models.CASCADE
-    )
+    ambassador = models.ForeignKey(Ambassador, on_delete=models.CASCADE)
 
-    purpose = models.ForeignKey(
-        Purpose, on_delete=models.CASCADE
-    )
+    purpose = models.ForeignKey(Purpose, on_delete=models.CASCADE)
