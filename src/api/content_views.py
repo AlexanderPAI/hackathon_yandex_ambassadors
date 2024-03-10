@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 
 from api.mixins import DestroyWithPayloadMixin
 from api.content_serializers import ContentSerializer, ContentPlatformSerialzier, GuideSerializer, GuideCreateUpdateSerializer, GuideKitSerializer, GuideTaskSerializer, GuideKitCreateUpdateSerializer, MerchPhotoSerializer, ReviewSerializer, ReviewPlatformSerializer
@@ -61,3 +62,10 @@ class ContentViewSet(DestroyWithPayloadMixin, ModelViewSet):
     """Представление для контента."""
     queryset = Content.objects.all()
     serializer_class = ContentSerializer
+
+    def get_queryset(self):
+        ambassador = self.request.query_params.get('ambassador')
+        content_obj = Content.objects.all()
+        if ambassador:
+            content_obj = content_obj.filter(ambassador=ambassador)
+        return content_obj
