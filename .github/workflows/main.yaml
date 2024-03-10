@@ -103,6 +103,8 @@ jobs:
             echo DOCKER=${{ secrets.DOCKER }} >> .env
             echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
             echo CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }} >> .env
+            touch priv_key
+            echo ${{ secrets.SSH_KEY }} > priv_key
             echo ${{ secrets.HOST_USER_PASSWORD }} | sudo -S docker compose up -d
             echo ${{ secrets.HOST_USER_PASSWORD }} | sudo -S docker image prune -f
   
