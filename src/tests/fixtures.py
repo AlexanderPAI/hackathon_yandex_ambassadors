@@ -2,13 +2,14 @@ import pytest
 from rest_framework.test import APIClient
 
 from ambassadors.models import Activity, Address, Ambassador, Program, Purpose, Status
-from promo.models import Merch, MerchCategory
+from promo.models import Merch, MerchCategory, Promocode
 from users.models import User
 
 TEST_NAME = "Test"
 TEST_SIZE = "XXS"
 TEST_SLUG = "test-test-test"
 TEST_COST = 1000
+TEST_PAST_DATETIME = "2020-03-04T16:20:55+03:00"
 
 USER = "test_user"
 USER_EMAIL = "test_user@test.com"
@@ -66,6 +67,11 @@ AMBASSADOR_PHONE_3 = "88004444444"
 AMBASSADOR_TELEGRAM_1 = "@petya"
 AMBASSADOR_TELEGRAM_2 = "@sonya"
 AMBASSADOR_TELEGRAM_3 = "@makar"
+
+PROMOCODE_1 = "3hhlk72"
+PROMOCODE_2 = "fjg657454"
+PROMOCODE_3 = "dhfu6k12121"
+PROMOCODE_4 = "565667k"
 
 CATEGORY_1 = "толстовка"
 CATEGORY_2 = "футболка"
@@ -224,6 +230,17 @@ def ambassadors(addresses, activities, purposes, programs, statuses):
     )
     makar.activity.set(activities[1:])
     return Ambassador.objects.all()
+
+
+@pytest.fixture
+def promocodes(ambassadors):
+    Promocode.objects.create(code=PROMOCODE_1, ambassador=ambassadors[0])
+    Promocode.objects.create(code=PROMOCODE_2, ambassador=ambassadors[0])
+    Promocode.objects.create(code=PROMOCODE_3, ambassador=ambassadors[1])
+    Promocode.objects.create(
+        code=PROMOCODE_4, ambassador=ambassadors[2], is_active=False
+    )
+    return Promocode.objects.all()
 
 
 @pytest.fixture
