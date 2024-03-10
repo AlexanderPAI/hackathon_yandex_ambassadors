@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models import F, Prefetch, Sum
 from rest_framework import serializers
 
+from .utils import YEAR_MONTHS
 from ambassadors.models import Address, Ambassador, Status
 from promo.models import (
     Merch,
@@ -34,11 +35,12 @@ class AmbassadorMerchSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField()
     clothing_size = serializers.ReadOnlyField()
     shoe_size = serializers.ReadOnlyField()
+    phone_number = serializers.ReadOnlyField()
     address = AddressMerchSerializer(read_only=True)
 
     class Meta:
         model = Ambassador
-        fields = ["id", "name", "clothing_size", "shoe_size", "address"]
+        fields = ["id", "name", "clothing_size", "shoe_size", "phone_number", "address"]
 
 
 class TutorMerchSerializer(serializers.ModelSerializer):
@@ -137,6 +139,7 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
         many=True, source="merch_in_applications", read_only=True
     )
     merch_cost = serializers.SerializerMethodField()
+    created_month = serializers.SerializerMethodField()
 
     class Meta:
         model = MerchApplication
@@ -146,6 +149,7 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
             "ambassador",
             "tutor",
             "created",
+            "created_month",
             "merch_cost",
             "merch",
         )
@@ -175,6 +179,10 @@ class MerchApplicationSerializer(serializers.ModelSerializer):
     def get_merch_cost(self, obj) -> float:
         """Shows the total cost of the merch in the application (annotated field)."""
         return obj.merch_cost
+
+    def get_created_month(self, obj) -> str:
+        """Shows the merch application creation month."""
+        return YEAR_MONTHS[obj.created.month - 1][2]
 
 
 # TODO: drf-yasg shows incorrect merch field in response body - without taking into
@@ -321,3 +329,9 @@ class DestroyObjectSuccessSerializer(serializers.Serializer):
     """Serializer to provide json response after objects deletion."""
 
     message = serializers.CharField()
+
+
+class GoogleSheetAPISerializer(serializers.Serializer):
+    """Serializer for link to Google Sheet."""
+
+    link = serializers.URLField()

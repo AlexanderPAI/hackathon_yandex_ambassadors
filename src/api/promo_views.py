@@ -6,6 +6,7 @@ from drf_standardized_errors.openapi_serializers import (
     ErrorResponse401Serializer,
     ErrorResponse403Serializer,
     ErrorResponse404Serializer,
+    ValidationErrorEnum,
     ValidationErrorResponseSerializer,
 )
 from drf_yasg import openapi
@@ -14,10 +15,15 @@ from rest_framework import filters, permissions, response, status, viewsets
 from rest_framework.decorators import action
 
 from .filters import MerchApplicationsFilter, MerchFilter, PromocodeFilter
+from .google_sheets_examples import (
+    create_merch_applications_sheet,
+    create_promocodes_sheet,
+)
 from .mixins import DestroyWithPayloadMixin
 from .permissions import IsTutorOrReadOnly
 from .promo_serializers import (
     DestroyObjectSuccessSerializer,
+    GoogleSheetAPISerializer,
     MerchApplicationCreateUpdateSerializer,
     MerchApplicationSerializer,
     MerchCategorySerializer,
@@ -27,24 +33,9 @@ from .promo_serializers import (
     PromocodeSerializer,
     YearBudgetSerializer,
 )
-from .utils import generate_application_number
+from .utils import YEAR_MONTHS, generate_application_number
 from ambassadors.models import Ambassador
 from promo.models import Merch, MerchApplication, MerchCategory, Promocode
-
-YEAR_MONTHS = [
-    ("january", 1),
-    ("february", 2),
-    ("march", 3),
-    ("april", 4),
-    ("may", 5),
-    ("june", 6),
-    ("july", 7),
-    ("august", 8),
-    ("september", 9),
-    ("october", 10),
-    ("november", 11),
-    ("december", 12),
-]
 
 year = openapi.Parameter(
     "year",
@@ -180,6 +171,17 @@ ambassadors = openapi.Parameter(
         manual_parameters=[year, ambassadors],
     ),
 )
+@method_decorator(
+    name="export_to_google_sheet",
+    decorator=swagger_auto_schema(
+        operation_summary="Export to Google sheet",
+        responses={
+            200: GoogleSheetAPISerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+    ),
+)
 class MerchApplicationViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
     """
     ViewSet for merch applications and annual merch budgets.
@@ -225,6 +227,8 @@ class MerchApplicationViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "budget_info":
             return YearBudgetSerializer
+        if self.action == "export_to_google_sheet":
+            return GoogleSheetAPISerializer
         if self.action in ["create", "partial_update"]:
             return MerchApplicationCreateUpdateSerializer
         return MerchApplicationSerializer
@@ -309,6 +313,32 @@ class MerchApplicationViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
         if not serializer.is_valid():
             return response.Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=False, filter_backends=[])
+    def export_to_google_sheet(self, request):
+        """Returns a link to Google sheet with information about sending merch."""
+        all_applications_qs = self.get_queryset()
+        spreadsheet_link = create_merch_applications_sheet(all_applications_qs)
+        serializer = self.get_serializer_class()(
+            data={"link": spreadsheet_link},
+            context={"request": request, "format": self.format_kwarg, "view": self},
+        )
+        if not serializer.is_valid():
+            payload = {
+                "type": ValidationErrorEnum.VALIDATION_ERROR,
+                "errors": [
+                    {
+                        "code": "invalid",
+                        "detail": serializer.errors["link"][0],
+                        "attr": "link",
+                    }
+                ],
+            }
+            return response.Response(
+                ValidationErrorResponseSerializer(payload).data,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -591,6 +621,17 @@ class MerchViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
         },
     ),
 )
+@method_decorator(
+    name="export_to_google_sheet",
+    decorator=swagger_auto_schema(
+        operation_summary="Export to Google sheet",
+        responses={
+            200: GoogleSheetAPISerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
+    ),
+)
 class PromocodeViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
     """
     ViewSet for promocodes.
@@ -621,6 +662,34 @@ class PromocodeViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
         return PromocodeSerializer.setup_eager_loading(Promocode.objects.all())
 
     def get_serializer_class(self):
+        if self.action == "export_to_google_sheet":
+            return GoogleSheetAPISerializer
         if self.action in ["create", "partial_update"]:
             return PromocodeCreateUpdateSerializer
         return PromocodeSerializer
+
+    @action(methods=["get"], detail=False, filter_backends=[])
+    def export_to_google_sheet(self, request):
+        """Returns a link to Google sheet with information about promocodes."""
+        all_promocodes_qs = self.get_queryset()
+        spreadsheet_link = create_promocodes_sheet(all_promocodes_qs)
+        serializer = self.get_serializer_class()(
+            data={"link": spreadsheet_link},
+            context={"request": request, "format": self.format_kwarg, "view": self},
+        )
+        if not serializer.is_valid():
+            payload = {
+                "type": ValidationErrorEnum.VALIDATION_ERROR,
+                "errors": [
+                    {
+                        "code": "invalid",
+                        "detail": serializer.errors["link"][0],
+                        "attr": "link",
+                    }
+                ],
+            }
+            return response.Response(
+                ValidationErrorResponseSerializer(payload).data,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return response.Response(serializer.data, status=status.HTTP_200_OK)

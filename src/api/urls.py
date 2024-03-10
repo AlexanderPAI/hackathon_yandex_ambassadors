@@ -12,7 +12,12 @@ from .promo_views import (
     PromocodeViewSet,
 )
 from .user_actions_views import UserActionsViewSet
-from api.content_views import GuideKitViewSet, GuideTaskViewSet, GuideViewSet, GuideStatusViewSet
+from api.content_views import (
+    GuideKitViewSet,
+    GuideStatusViewSet,
+    GuideTaskViewSet,
+    GuideViewSet,
+)
 
 app_name = "api"
 
