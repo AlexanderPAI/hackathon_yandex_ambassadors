@@ -93,7 +93,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/hackathon_yandex_crm:v.01
             sudo docker compose up -d
             sudo docker image prune -f
-            sudo docker cp token.json backend:/app
+            echo ${{ secrets.HOST_USER_PASSWORD }} | sudo -S docker cp token.json backend:/app
   
   send_message:
     runs-on: ubuntu-latest
