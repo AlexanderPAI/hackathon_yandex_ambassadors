@@ -89,24 +89,11 @@ jobs:
           username: ${{ secrets.HOST_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            touch priv_key
-            echo ${{ secrets.SSH_KEY }} > priv_key
             echo ${{ secrets.HOST_USER_PASSWORD }} | sudo -S docker compose stop
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/hackathon_yandex_crm:v.01
-            touch .env
-            echo DB_ENGINE=${{ secrets.DB_ENGINE }} > .env
-            echo DB_NAME=${{ secrets.DB_NAME }} >> .env
-            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
-            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
-            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
-            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            echo MODE=${{ secrets.MODE }} >> .env
-            echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
-            echo DOCKER=${{ secrets.DOCKER }} >> .env
-            echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
-            echo CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }} >> .env
-            echo ${{ secrets.HOST_USER_PASSWORD }} | sudo -S docker compose up -d
-            echo ${{ secrets.HOST_USER_PASSWORD }} | sudo -S docker image prune -f
+            sudo docker compose up -d
+            sudo docker image prune -f
+            sudo docker cp token.json backend:/app
   
   send_message:
     runs-on: ubuntu-latest
