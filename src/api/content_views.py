@@ -1,9 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
 
 from api.mixins import DestroyWithPayloadMixin
-from api.content_serializers import ContentSerializer, ContentPlatformSerialzier, GuideSerializer, GuideCreateUpdateSerializer, GuideKitSerializer, GuideTaskSerializer, GuideKitCreateUpdateSerializer, MerchPhotoSerializer, ReviewSerializer, ReviewPlatformSerializer
-from content.models import Content, ContentPlatform, Guide, GuideKit, GuideTask, MerchPhoto, Review, ReviewPlatform
+from api.content_serializers import ContentSerializer, GuideSerializer, GuideCreateUpdateSerializer, GuideKitSerializer, GuideTaskSerializer, GuideKitCreateUpdateSerializer, MerchPhotoSerializer
+
+from content.models import Content, Guide, GuideKit, GuideTask, MerchPhoto
 
 
 class GuideTaskViewSet(DestroyWithPayloadMixin, ModelViewSet):
@@ -40,24 +40,6 @@ class MerchPhotoViewSet(DestroyWithPayloadMixin, ModelViewSet):
     serializer_class = MerchPhotoSerializer
 
 
-class ReviewPlaformViewSet(DestroyWithPayloadMixin, ModelViewSet):
-    """Представление платформы для отзыва."""
-    queryset = ReviewPlatform.objects.all()
-    serializer_class = ReviewPlatformSerializer
-
-
-class ReviewViewSet(DestroyWithPayloadMixin, ModelViewSet):
-    """Преставление для отзыва."""
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-
-
-class ContentPlatformViewSet(DestroyWithPayloadMixin, ModelViewSet):
-    """Представление для платформы контента."""
-    queryset = ContentPlatform.objects.all()
-    serializer_class = ContentPlatformSerialzier
-
-
 class ContentViewSet(DestroyWithPayloadMixin, ModelViewSet):
     """Представление для контента."""
     queryset = Content.objects.all()
@@ -69,3 +51,8 @@ class ContentViewSet(DestroyWithPayloadMixin, ModelViewSet):
         if ambassador:
             content_obj = content_obj.filter(ambassador=ambassador)
         return content_obj
+
+
+# class ContentPageViewSet(ModelViewSet):
+#     """Представление для страницы контент со списком амбассадоров."""
+#     queryset = Ambassador.objects.all()

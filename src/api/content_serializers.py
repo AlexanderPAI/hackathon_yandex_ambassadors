@@ -4,7 +4,8 @@ from django.core.files.base import ContentFile
 
 from rest_framework import serializers
 
-from content.models import Content, ContentPlatform, Guide, GuideKit, GuideTask, GuideTaskGuideKit, MerchPhoto, ReviewPlatform, Review
+from ambassadors.models import Ambassador
+from content.models import Content, Guide, GuideKit, GuideTask, GuideTaskGuideKit, MerchPhoto
 
 
 class GuideTaskSerializer(serializers.ModelSerializer):
@@ -134,35 +135,30 @@ class MerchPhotoSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ReviewPlatformSerializer(serializers.ModelSerializer):
-    """Сериализатор платформы для отзыва."""
-
-    class Meta:
-        model = ReviewPlatform
-        fields = "__all__"
-
-
-class ReviewSerializer(serializers.ModelSerializer):
-    """Сериализатор отзыва."""
-    platform = serializers.SlugRelatedField(slug_field='slug', queryset=ReviewPlatform.objects.all())
-
-    class Meta:
-        model = Review
-        fields = "__all__"
-
-
-class ContentPlatformSerialzier(serializers.ModelSerializer):
-    """Сериализтор платформы контента."""
-
-    class Meta:
-        model = ContentPlatform
-        fields = "__all__"
-
-
 class ContentSerializer(serializers.ModelSerializer):
     """Сериализтор контента."""
-    platform = serializers.SlugRelatedField(slug_field='slug', queryset=ContentPlatform.objects.all())
 
     class Meta:
         model = Content
-        fields = "__all__"
+        fields = (
+            "id",
+            "created",
+            "link",
+            "is_guide_content",
+            "ambassador",
+            "platform",
+            "type",
+        )
+
+
+class ContentPageSerialzier(serializers.ModelSerializer):
+    """Сериализатор для страницы Контент."""
+
+
+    class Meta:
+        model = Ambassador
+        fields = (
+            "name",
+            "telegram_id",
+
+        )

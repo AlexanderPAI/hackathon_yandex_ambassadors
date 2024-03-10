@@ -12,7 +12,7 @@ from .promo_views import (
     PromocodeViewSet,
 )
 from .user_actions_views import UserActionsViewSet
-from api.content_views import ContentViewSet, ContentPlatformViewSet, GuideKitViewSet, GuideTaskViewSet, GuideViewSet, MerchPhotoViewSet, ReviewViewSet, ReviewPlaformViewSet
+from api.content_views import ContentViewSet, GuideKitViewSet, GuideTaskViewSet, GuideViewSet, MerchPhotoViewSet
 
 app_name = "api"
 
@@ -35,11 +35,9 @@ router.register("guides", GuideViewSet)
 router.register("guide_tasks", GuideTaskViewSet)
 router.register("guide_kits", GuideKitViewSet)
 router.register("merch_photo", MerchPhotoViewSet)
-router.register("review_platforms", ReviewPlaformViewSet)
-router.register("reviews", ReviewViewSet)
 
 # Content
-router.register("content_platforms", ContentPlatformViewSet)
+router.register("merch_photo", MerchPhotoViewSet)
 router.register("content", ContentViewSet)
 
 

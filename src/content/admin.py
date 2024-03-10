@@ -2,14 +2,11 @@ from django.contrib import admin
 
 from content.models import (
     Content,
-    ContentPlatform,
     Guide,
     GuideKit,
     GuideTask,
     GuideTaskGuideKit,
     MerchPhoto,
-    Review,
-    ReviewPlatform,
 )
 
 
@@ -50,32 +47,6 @@ class MerchPhotoAdmin(admin.ModelAdmin):
     list_display = ["id", "ambassador"]
 
 
-@admin.register(ReviewPlatform)
-class ReviewPlatformAdmin(admin.ModelAdmin):
-    list_display = ["id", "name", "slug"]
-
-
-@admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
-    list_display = [
-        "id",
-        "ambassador",
-        "platform",
-        "link",
-    ]
-    search_fields = ["ambassador"]
-    list_filter = ["platform"]
-
-
-@admin.register(ContentPlatform)
-class ContentPlatform(admin.ModelAdmin):
-    list_display = [
-        "id",
-        "name",
-        "slug",
-    ]
-
-
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):
     list_display = [
@@ -83,6 +54,7 @@ class ContentAdmin(admin.ModelAdmin):
         "ambassador",
         "created",
         "platform",
+        "type",
         "link",
         "is_guide_content",
     ]
