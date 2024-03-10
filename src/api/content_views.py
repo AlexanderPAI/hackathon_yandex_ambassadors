@@ -1,25 +1,29 @@
 from rest_framework.viewsets import ModelViewSet
 
+from ambassadors.models import Ambassador
 from api.content_serializers import (
+    ContentCreateUpdateSerializer,
+    ContentPageSerialzier,
+    ContentSerializer,
     GuideCreateUpdateSerializer,
     GuideKitCreateUpdateSerializer,
     GuideKitSerializer,
     GuideSerializer,
-    GuideStatusSerializer,
     GuideTaskSerializer,
+    MerchPhotoSerializer,
 )
-from content.models import Guide, GuideKit, GuideStatus, GuideTask
+from api.mixins import DestroyWithPayloadMixin
+from content.models import Content, Guide, GuideKit, GuideTask, MerchPhoto
 
 
-# TODO: duplicate queries in guide kits
-class GuideTaskViewSet(ModelViewSet):
+class GuideTaskViewSet(DestroyWithPayloadMixin, ModelViewSet):
     """Представление задачи для гайда."""
 
     queryset = GuideTask.objects.all()
     serializer_class = GuideTaskSerializer
 
 
-class GuideKitViewSet(ModelViewSet):
+class GuideKitViewSet(DestroyWithPayloadMixin, ModelViewSet):
     """Представление набора задач для гайда."""
 
     queryset = GuideKit.objects.all()
@@ -31,16 +35,7 @@ class GuideKitViewSet(ModelViewSet):
         return GuideKitSerializer
 
 
-# TODO: duplicate queries guide status?
-class GuideStatusViewSet(ModelViewSet):
-    """Представление статуса гайда."""
-
-    queryset = GuideStatus.objects.all()
-    serializer_class = GuideStatusSerializer
-
-
-# TODO: duplicate queries guides?
-class GuideViewSet(ModelViewSet):
+class GuideViewSet(DestroyWithPayloadMixin, ModelViewSet):
     """Представление гайда."""
 
     queryset = Guide.objects.all()
@@ -50,3 +45,35 @@ class GuideViewSet(ModelViewSet):
         if self.action == "create" or self.action == "partial_update":
             return GuideCreateUpdateSerializer
         return GuideSerializer
+
+
+class MerchPhotoViewSet(DestroyWithPayloadMixin, ModelViewSet):
+    """Преставление для сущности Фото в мерче."""
+
+    queryset = MerchPhoto.objects.all()
+    serializer_class = MerchPhotoSerializer
+
+
+class ContentViewSet(DestroyWithPayloadMixin, ModelViewSet):
+    """Представление для контента."""
+
+    queryset = Content.objects.all()
+    serializer_class = ContentSerializer
+
+    def get_queryset(self):
+        ambassador = self.request.query_params.get("ambassador")
+        if ambassador:
+            return Content.objects.filter(ambassador=ambassador)
+        return Content.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == "create" or self.action == "partial_update":
+            return ContentCreateUpdateSerializer
+        return ContentSerializer
+
+
+class ContentPageViewSet(ModelViewSet):
+    """Представление для страницы контент со списком амбассадоров."""
+
+    queryset = Ambassador.objects.all()
+    serializer_class = ContentPageSerialzier

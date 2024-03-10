@@ -16,6 +16,7 @@ services:
     container_name: "backend"
     volumes:
       - static_value:/app/static/
+      - media_value:/app/media/
     restart: always
     depends_on:
       - db
@@ -37,6 +38,7 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
       - static_value:/var/html/static
+      - media_value://var/html/media
     restart: always
     entrypoint: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     depends_on:
@@ -55,3 +57,4 @@ services:
 volumes:
   postgres_value:
   static_value:
+  media_value:

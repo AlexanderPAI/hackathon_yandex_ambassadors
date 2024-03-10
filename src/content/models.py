@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.text import slugify
 
 from ambassadors.models import Ambassador
 
@@ -63,33 +62,6 @@ class GuideTaskGuideKit(models.Model):
     )
 
 
-class GuideStatus(models.Model):
-    """Модель статуса гайда."""
-
-    name = models.CharField(
-        max_length=200,
-        verbose_name="Статус гайда",
-    )
-    slug = models.SlugField(
-        unique=True,
-        max_length=50,
-    )
-
-    class Meta:
-        verbose_name = "Статус гайда"
-        verbose_name_plural = "Статусы гайдов"
-        ordering = ["name"]
-
-    def save(self, *args, **kwargs):
-        "Автоматический slug."
-        if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-
 class Guide(models.Model):
     STATUS = {
         "pause": "На паузе",
@@ -147,91 +119,13 @@ class MerchPhoto(models.Model):
         return f"Фото {self.ambassador.name}"
 
 
-class ReviewPlatfrom(models.Model):
-    """Модель платформы отзыва."""
-
-    name = models.CharField(
-        max_length=200,
-        verbose_name="Название платформы",
-    )
-    slug = models.SlugField(
-        unique=True,
-        max_length=50,
-    )
-
-    class Meta:
-        verbose_name = "Платформа для отзыва"
-        verbose_name_plural = "Платформы для отзыва"
-        ordering = ["name"]
-
-    def save(self, *args, **kwargs):
-        "Автоматический slug."
-        if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-
-class Review(models.Model):
-    """Модель отзыва амбассадора."""
-
-    ambassador = models.ForeignKey(
-        Ambassador,
-        on_delete=models.CASCADE,
-        related_name="reviews",
-        verbose_name="Амбассадор",
-    )
-    platform = models.ForeignKey(
-        ReviewPlatfrom,
-        on_delete=models.CASCADE,
-        related_name="reviews",
-        verbose_name="Платформа",
-    )
-    link = models.URLField(
-        verbose_name="Ссылка",
-    )
-
-    class Meta:
-        verbose_name = ("Отзыв",)
-        verbose_name_plural = "Отзывы"
-        ordering = ["id"]
-
-    def __str__(self):
-        return f"Отзыв {self.ambassador.name} на {self.platform.name}"
-
-
-class ContentPlatform(models.Model):
-    """Модель платформы контента."""
-
-    name = models.CharField(
-        max_length=200,
-        verbose_name="Название платформы",
-    )
-    slug = models.SlugField(
-        unique=True,
-        verbose_name="slug",
-    )
-
-    class Meta:
-        verbose_name = "Платформа контента"
-        verbose_name_plural = "Платформы контента"
-        ordering = ["name"]
-
-    def save(self, *args, **kwargs):
-        "Автоматический slug."
-        if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-
 class Content(models.Model):
     """Модель контента."""
 
+    TYPES = {
+        "review": "Отзыв",
+        "content": "Контент",
+    }
     ambassador = models.ForeignKey(
         Ambassador,
         on_delete=models.CASCADE,
@@ -242,18 +136,34 @@ class Content(models.Model):
         auto_now_add=True,
         verbose_name="Дата создания",
     )
-    platform = models.ForeignKey(
-        ContentPlatform,
-        on_delete=models.CASCADE,
-        related_name="reviews",
-        verbose_name="Платформа",
-    )
     link = models.URLField(
         verbose_name="Ссылка",
+        max_length=5000,
     )
     is_guide_content = models.BooleanField(
         default=False,
         verbose_name="Контент в рамках гайда",
+    )
+    platform = models.CharField(
+        max_length=200,
+        verbose_name="Платформа",
+        null=True,
+    )
+    type = models.CharField(
+        max_length=200,
+        choices=TYPES,
+        null=True,
+        verbose_name="Тип (отзыв/контент)",
+    )
+    image = models.ImageField(
+        upload_to="content/",
+        default="None",
+        verbose_name="Изображение",
+    )
+    comment = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Комментарий",
     )
 
     class Meta:
@@ -262,4 +172,4 @@ class Content(models.Model):
         ordering = ["-created"]
 
     def __str__(self):
-        return f"Контент {self.ambassador.name} на {self.platform.name}"
+        return f"{self.ambassador.name} на {self.platform}"

@@ -27,14 +27,20 @@ class ActivitySerializer(serializers.ModelSerializer):
     """Serializer for Activity model."""
     class Meta:
         model = Activity
-        fields = ("id", "name",)
+        fields = (
+            "id",
+            "name",
+        )
 
 
 class ProgramSerializer(serializers.ModelSerializer):
     """Serializer for Program model"""
     class Meta:
         model = Program
-        fields = ("id", "name",)
+        fields = (
+            "id",
+            "name",
+        )
 
 
 class PurposeSerializer(serializers.ModelSerializer):

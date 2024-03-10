@@ -33,8 +33,7 @@ class AuthApiTest(TestCaseWithMockData):
     def test_login(self):
         response = self.client.post(
             path=AUTH_URL,
-            data=json.dumps({"email": USER_EMAIL,
-                             "password": TEST_PASSWORD}),
+            data=json.dumps({"email": USER_EMAIL, "password": TEST_PASSWORD}),
             content_type="application/json",
         )
         assert response.status_code == 200
