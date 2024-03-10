@@ -168,6 +168,10 @@ def test_delete_promocode(auth_client, promocodes):
     assert response.data["message"] == MESSAGE_ON_DELETE
 
 
+@pytest.mark.skip(
+    "Does not work during CI/CD workflow as GitHub Actions can't find credentials.json "
+    "(it is in gitignore)"
+)
 @pytest.mark.django_db
 def test_get_promocode_google_sheet_link(auth_client, promocodes):
     response = auth_client.get("/api/v1/promocodes/export_to_google_sheet/")
