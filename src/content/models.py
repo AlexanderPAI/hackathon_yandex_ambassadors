@@ -158,6 +158,8 @@ class Content(models.Model):
     image = models.ImageField(
         upload_to="content/",
         default="None",
+        null=True,
+        blank=True,
         verbose_name="Изображение",
     )
     comment = models.TextField(
