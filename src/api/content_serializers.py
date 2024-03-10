@@ -202,9 +202,7 @@ class ContentCreateUpdateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         link = validated_data['link']
         platform = get_platfrom(link)
-        print(platform)
         type = get_type(platform)
-        print(type)
         content = Content.objects.create(
             **validated_data,
             platform=platform,
@@ -217,7 +215,7 @@ class ContentCreateUpdateSerializer(serializers.ModelSerializer):
 class ContentPageSerialzier(serializers.ModelSerializer):
     """Сериализатор для страницы Контент."""
     review = serializers.SerializerMethodField()
-    # content = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField()
 
     class Meta:
         model = Ambassador
@@ -225,9 +223,17 @@ class ContentPageSerialzier(serializers.ModelSerializer):
             "name",
             "telegram_id",
             "review",
+            "content",
         )
 
     def get_review(self, obj):
-        content = Content.objects.all()[0]
-        link = content.link
-        return link
+        review = obj.content.filter(type='review')
+        if review:
+            return review[0].link
+        return 'Еще нет отзывов'
+
+    def get_content(self, obj):
+        content = obj.content.filter(type='content')
+        if content:
+            return content[0].link
+        return 'Еще нет контента'

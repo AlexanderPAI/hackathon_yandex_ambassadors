@@ -63,8 +63,3 @@ class ContentPageViewSet(ModelViewSet):
     """Представление для страницы контент со списком амбассадоров."""
     queryset = Ambassador.objects.all()
     serializer_class = ContentPageSerialzier
-
-    def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'partial_update':
-            return ContentCreateUpdateSerializer
-        return ContentSerializer
