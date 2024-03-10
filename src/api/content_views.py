@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 
 from ambassadors.models import Ambassador
-from api.content_serializers import (  # ContentPageUpdateSerializer,
+from api.content_serializers import (
     ContentCreateSerializer,
     ContentPageSerialzier,
     ContentSerializer,
@@ -46,6 +46,14 @@ class GuideViewSet(DestroyWithPayloadMixin, ModelViewSet):
         if self.action == "create" or self.action == "partial_update":
             return GuideCreateUpdateSerializer
         return GuideSerializer
+
+    def get_queryset(self):
+        params = self.request.query_params
+        if "ambassador" in params:
+            return Guide.objects.filter(
+                ambassador=params["ambassador"],
+            )
+        return Guide.objects.all()
 
 
 class MerchPhotoViewSet(DestroyWithPayloadMixin, ModelViewSet):

@@ -234,8 +234,10 @@ class ContentCreateSerializer(ContentUpdateSerializer):
 class ContentPageSerialzier(serializers.ModelSerializer):
     """Сериализатор для страницы Контент."""
 
-    review = serializers.SerializerMethodField()
+    review = ContentSerializer()
     content = serializers.SerializerMethodField()
+    sending_merch = serializers.SerializerMethodField()
+    guide_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Ambassador
@@ -246,13 +248,15 @@ class ContentPageSerialzier(serializers.ModelSerializer):
             "review",
             "content",
             "comment",
+            "sending_merch",
+            "guide_status",
         )
 
-    def get_review(self, obj):
-        review = obj.content.filter(type="review")
-        if review:
-            return review[0].link
-        return "Еще нет отзывов"
+    # def get_review(self, obj):
+    #     review = obj.content.filter(type="review")
+    #     if review:
+    #         return review[0].link
+    #     return "Еще нет отзывов"
 
     def get_content(self, obj):
         content = obj.content.filter(type="content")
@@ -260,28 +264,31 @@ class ContentPageSerialzier(serializers.ModelSerializer):
             return content[0].link
         return "Еще нет контента"
 
+    def get_sending_merch(self, obj):
+        """Доступно мерча к отправке."""
+        # Достаем всё, иначе очень много запросов в БД
+        content_all = obj.content.all()
+        reviews = 0
+        content = 0
+        # И поэтому считаем циклом - O(n), все нормально =)
+        for data in content_all:
+            if data.type == "review":
+                reviews += 1
+            if data.type == "content":
+                content += 1
+        if reviews == 0 and content == 0:
+            return 0
+        if reviews == 1 or content == 1:
+            return 1
+        if reviews == 1 and content >= 2:
+            return 2
+        if content == 1 and reviews >= 2:
+            return 2
+        return 2
 
-# class ContentPageUpdateSerializer(ContentPageSerialzier):
-#
-#     def update(self, instance, validated_data):
-#         review = self.__getitem__("review").value
-#         content = self.__getitem__("content").value
-#         content_field = validated_data.pop("content")
-#         print(validated_data)
-#         # if "review" in validated_data or "content" in validated_data:
-#         #     if review != "Еще нет отзывов":
-#         #         pass
-#         #     if content != "Еще нет контента":
-#         #         content_obj = instance.content.filter(link=content)
-#         #         print(validated_data["content"])
-#         #         content_obj(link=validated_data["content"]).save()
-#         # if "review" in validated_data or "content" in validated_data:
-#         #     if self.review != 'Еще нет отзывов':
-#         #         review = instance.content.filter(link=self.review)
-#         #         review(link=validated_data["review"]).save()
-#         #     if self.content != 'Еще нет контента':
-#         #         print(self.content)
-#         #         print(validated_data["content"])
-#         #         content = instance.content.filter(link=self.content)
-#         #         content(link=validated_data["content"]).save()
-#         return super().update(instance, validated_data)
+    # def get_guide_status(self, obj):
+    #     try:
+    #         guide = Guide.objects.get(ambassador=obj)
+    #         return guide.status
+    #     except:
+    #         return "There is no guide"
