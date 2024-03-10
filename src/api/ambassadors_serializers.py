@@ -12,6 +12,7 @@ from ambassadors.models import (
 
 class AddressSerializer(serializers.ModelSerializer):
     """Serializer for Address model."""
+
     class Meta:
         model = Address
         fields = (
@@ -25,6 +26,7 @@ class AddressSerializer(serializers.ModelSerializer):
 
 class ActivitySerializer(serializers.ModelSerializer):
     """Serializer for Activity model."""
+
     class Meta:
         model = Activity
         fields = (
@@ -35,6 +37,7 @@ class ActivitySerializer(serializers.ModelSerializer):
 
 class ProgramSerializer(serializers.ModelSerializer):
     """Serializer for Program model"""
+
     class Meta:
         model = Program
         fields = (
@@ -45,13 +48,19 @@ class ProgramSerializer(serializers.ModelSerializer):
 
 class PurposeSerializer(serializers.ModelSerializer):
     """Serializer for Purpose model"""
+
     class Meta:
         model = Purpose
-        fields = ("id", "name", "personal_purpose",)
+        fields = (
+            "id",
+            "name",
+            "personal_purpose",
+        )
 
 
 class AmbassadorReadSerializer(serializers.ModelSerializer):
     """Serializer for reading Ambassador model"""
+
     activity = ActivitySerializer(read_only=True, many=True)
     address = AddressSerializer(read_only=True)
     purpose = PurposeSerializer(read_only=True)
@@ -96,6 +105,7 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
 
 class AmbassadorCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating Ambassador model"""
+
     activity = ActivitySerializer(many=True)
     address = AddressSerializer(required=False)
     purpose = PurposeSerializer()
@@ -150,9 +160,7 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
         instance.phone_number = validated_data.pop(
             "phone_number", instance.phone_number
         )
-        instance.telegram_id = validated_data.pop(
-            "telegram_id", instance.telegram_id
-        )
+        instance.telegram_id = validated_data.pop("telegram_id", instance.telegram_id)
         instance.whatsapp = validated_data.pop("whatsapp", instance.whatsapp)
         instance.blog_link = validated_data.pop("blog_link", instance.blog_link)
         instance.onboarding_status = validated_data.pop(
@@ -169,10 +177,7 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
             AmbassadorActivity.objects.filter(ambassador=instance).all().delete()
             for activity in validated_data["activity"]:
                 activity, status = Activity.objects.get_or_create(name=activity["name"])
-                AmbassadorActivity(
-                    ambassador=instance,
-                    activity=activity
-                ).save()
+                AmbassadorActivity(ambassador=instance, activity=activity).save()
         instance.save()
         return instance
 

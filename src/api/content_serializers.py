@@ -186,7 +186,6 @@ class ContentSerializer(serializers.ModelSerializer):
             "ambassador",
             "platform",
             "type",
-            "comment",
             "image",
         )
 
@@ -206,15 +205,14 @@ class ContentUpdateSerializer(serializers.ModelSerializer):
             "ambassador",
             "platform",
             "type",
-            "comment",
             "image",
         )
 
-# Перенести в Create
+    # Перенести в Create
     def create(self, validated_data):
         is_guide_content = False
         is_guide_content_field = validated_data.pop("is_guide_content")
-        if is_guide_content_field == 'Да':
+        if is_guide_content_field == "Да":
             is_guide_content = True
         link = validated_data["link"]
         platform = get_content_platfrom(link)
@@ -264,21 +262,19 @@ class ContentPageSerialzier(serializers.ModelSerializer):
 
 
 # class ContentPageUpdateSerializer(ContentPageSerialzier):
-#     review = serializers.URLField()
-#     content = serializers.URLField()
 #
 #     def update(self, instance, validated_data):
 #         review = self.__getitem__("review").value
 #         content = self.__getitem__("content").value
+#         content_field = validated_data.pop("content")
 #         print(validated_data)
-#         if "review" in validated_data or "content" in validated_data:
-#             if review != "Еще нет отзывов":
-#                 pass
-#             if content != "Еще нет контента":
-#                 content_obj = instance.content.filter(link=content)
-#                 print(validated_data["content"])
-#                 content_obj(link=validated_data["content"]).save()
-#         field = self.__getitem__("content")
+#         # if "review" in validated_data or "content" in validated_data:
+#         #     if review != "Еще нет отзывов":
+#         #         pass
+#         #     if content != "Еще нет контента":
+#         #         content_obj = instance.content.filter(link=content)
+#         #         print(validated_data["content"])
+#         #         content_obj(link=validated_data["content"]).save()
 #         # if "review" in validated_data or "content" in validated_data:
 #         #     if self.review != 'Еще нет отзывов':
 #         #         review = instance.content.filter(link=self.review)

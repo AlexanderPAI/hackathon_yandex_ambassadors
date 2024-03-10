@@ -21,12 +21,28 @@ class AmbassadorViewSet(DestroyWithPayloadMixin, ModelViewSet):
 
     queryset = Ambassador.objects.all()
     serializer_class = AmbassadorReadSerializer
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter,
-                       filters.OrderingFilter,)
-    filter_fields = ("status", "name", "gender", "onboarding_status", "program",
-                     "country", "city", "activity",)
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+    filter_fields = (
+        "status",
+        "name",
+        "gender",
+        "onboarding_status",
+        "program",
+        "country",
+        "city",
+        "activity",
+    )
     search_fields = "name"
-    ordering_fields = ("created", "email", "phone_number", "telegram_id",)
+    ordering_fields = (
+        "created",
+        "email",
+        "phone_number",
+        "telegram_id",
+    )
 
     serializer_action_classes = {
         "list": AmbassadorReadSerializer,
