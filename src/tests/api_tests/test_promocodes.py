@@ -166,3 +166,11 @@ def test_delete_promocode(auth_client, promocodes):
 
     assert response.status_code == 200
     assert response.data["message"] == MESSAGE_ON_DELETE
+
+
+@pytest.mark.django_db
+def test_get_promocode_google_sheet_link(auth_client, promocodes):
+    response = auth_client.get("/api/v1/promocodes/export_to_google_sheet/")
+
+    assert response.status_code == 200
+    assert "https://docs.google.com/spreadsheets/d/" in response.data["link"]
