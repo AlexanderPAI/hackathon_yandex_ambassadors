@@ -174,7 +174,7 @@ class MerchPhotoSerializer(serializers.ModelSerializer):
 class ContentSerializer(serializers.ModelSerializer):
     """Сериализтор контента."""
 
-    image = Base64ImageField()
+    image = Base64ImageField(required=False)
 
     class Meta:
         model = Content
@@ -194,7 +194,7 @@ class ContentSerializer(serializers.ModelSerializer):
 class ContentCreateUpdateSerializer(serializers.ModelSerializer):
     """Сериализатор создания контента."""
 
-    image = Base64ImageField()
+    image = Base64ImageField(required=False)
 
     class Meta:
         model = Content
