@@ -12,7 +12,7 @@ from .promo_views import (
     PromocodeViewSet,
 )
 from .user_actions_views import UserActionsViewSet
-from api.content_views import GuideKitViewSet, GuideTaskViewSet, GuideViewSet, MerchPhotoViewSet, ReviewViewSet, ReviewPlaformViewSet
+from api.content_views import ContentViewSet, ContentPlatformViewSet, GuideKitViewSet, GuideTaskViewSet, GuideViewSet, MerchPhotoViewSet, ReviewViewSet, ReviewPlaformViewSet
 
 app_name = "api"
 
@@ -39,6 +39,8 @@ router.register("review_platforms", ReviewPlaformViewSet)
 router.register("reviews", ReviewViewSet)
 
 # Content
+router.register("content_platforms", ContentPlatformViewSet)
+router.register("content", ContentViewSet)
 
 
 urlpatterns = [

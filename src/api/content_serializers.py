@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 
 from rest_framework import serializers
 
-from content.models import Guide, GuideKit, GuideTask, GuideTaskGuideKit, MerchPhoto, ReviewPlatform, Review
+from content.models import Content, ContentPlatform, Guide, GuideKit, GuideTask, GuideTaskGuideKit, MerchPhoto, ReviewPlatform, Review
 
 
 class GuideTaskSerializer(serializers.ModelSerializer):
@@ -151,3 +151,18 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ContentPlatformSerialzier(serializers.ModelSerializer):
+    """Сериализтор платформы контента."""
+
+    class Meta:
+        model = ContentPlatform
+        fields = "__all__"
+
+
+class ContentSerializer(serializers.ModelSerializer):
+    """Сериализтор контента."""
+    platform = serializers.SlugRelatedField(slug_field='slug', queryset=ContentPlatform.objects.all())
+
+    class Meta:
+        model = Content
+        fields = "__all__"

@@ -1,8 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
 
 from api.mixins import DestroyWithPayloadMixin
-from api.content_serializers import GuideSerializer, GuideCreateUpdateSerializer, GuideKitSerializer, GuideTaskSerializer, GuideKitCreateUpdateSerializer, MerchPhotoSerializer, ReviewSerializer, ReviewPlatformSerializer
-from content.models import Guide, GuideKit, GuideTask, MerchPhoto, Review, ReviewPlatform
+from api.content_serializers import ContentSerializer, ContentPlatformSerialzier, GuideSerializer, GuideCreateUpdateSerializer, GuideKitSerializer, GuideTaskSerializer, GuideKitCreateUpdateSerializer, MerchPhotoSerializer, ReviewSerializer, ReviewPlatformSerializer
+from content.models import Content, ContentPlatform, Guide, GuideKit, GuideTask, MerchPhoto, Review, ReviewPlatform
 
 
 class GuideTaskViewSet(DestroyWithPayloadMixin, ModelViewSet):
@@ -49,3 +49,15 @@ class ReviewViewSet(DestroyWithPayloadMixin, ModelViewSet):
     """Преставление для отзыва."""
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+
+class ContentPlatformViewSet(DestroyWithPayloadMixin, ModelViewSet):
+    """Представление для платформы контента."""
+    queryset = ContentPlatform.objects.all()
+    serializer_class = ContentPlatformSerialzier
+
+
+class ContentViewSet(DestroyWithPayloadMixin, ModelViewSet):
+    """Представление для контента."""
+    queryset = Content.objects.all()
+    serializer_class = ContentSerializer
