@@ -234,10 +234,10 @@ class ContentCreateSerializer(ContentUpdateSerializer):
 class ContentPageSerialzier(serializers.ModelSerializer):
     """Сериализатор для страницы Контент."""
 
-    review = ContentSerializer()
+    review = serializers.SerializerMethodField()
     content = serializers.SerializerMethodField()
     sending_merch = serializers.SerializerMethodField()
-    guide_status = serializers.SerializerMethodField()
+    # guide_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Ambassador
@@ -249,14 +249,14 @@ class ContentPageSerialzier(serializers.ModelSerializer):
             "content",
             "comment",
             "sending_merch",
-            "guide_status",
+            # "guide_status",
         )
 
-    # def get_review(self, obj):
-    #     review = obj.content.filter(type="review")
-    #     if review:
-    #         return review[0].link
-    #     return "Еще нет отзывов"
+    def get_review(self, obj):
+        review = obj.content.filter(type="review")
+        if review:
+            return review[0].link
+        return "Еще нет отзывов"
 
     def get_content(self, obj):
         content = obj.content.filter(type="content")
