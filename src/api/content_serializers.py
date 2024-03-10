@@ -8,6 +8,39 @@ from ambassadors.models import Ambassador
 from content.models import Content, Guide, GuideKit, GuideTask, GuideTaskGuideKit, MerchPhoto
 
 
+def get_platfrom(link):
+    platform = link[:]
+    if '//' in platform:
+        platform = platform.split('//')[1].split('/')
+        if 'www.' in platform[0]:
+            platform[0] = platform[0].replace('www.', '')
+        if 'yandex' in platform[0] or 'google' in platform[0]:
+            platform = platform[0] + '/' + platform[1]
+        else:
+            platform = platform[0]
+    else:
+        platform = platform.split('/')[0]
+    return platform
+
+
+def get_type(platform):
+    reviews_platforms = [
+            'career.habr.com',
+            'sravni.ru',
+            'tutortop.ru',
+            'irecommend.ru',
+            'journal.tinkoff.ru',
+            'mooc.ru',
+            'katalog-kursov.ru',
+            'otzovik.com',
+            'yandex.ru/maps/',
+            'google.com/maps',
+        ]
+    if platform in reviews_platforms:
+        return 'review'
+    return 'content'
+
+
 class GuideTaskSerializer(serializers.ModelSerializer):
     """Сериализатор задачи для гайда."""
 
@@ -151,14 +184,50 @@ class ContentSerializer(serializers.ModelSerializer):
         )
 
 
+class ContentCreateUpdateSerializer(serializers.ModelSerializer):
+    """Сериализатор создания контента."""
+
+    class Meta:
+        model = Content
+        fields = (
+            "id",
+            "created",
+            "link",
+            "is_guide_content",
+            "ambassador",
+            "platform",
+            "type"
+        )
+
+    def create(self, validated_data):
+        link = validated_data['link']
+        platform = get_platfrom(link)
+        print(platform)
+        type = get_type(platform)
+        print(type)
+        content = Content.objects.create(
+            **validated_data,
+            platform=platform,
+            type=type,
+        )
+        return content
+
+
+
 class ContentPageSerialzier(serializers.ModelSerializer):
     """Сериализатор для страницы Контент."""
-
+    review = serializers.SerializerMethodField()
+    # content = serializers.SerializerMethodField()
 
     class Meta:
         model = Ambassador
         fields = (
             "name",
             "telegram_id",
-
+            "review",
         )
+
+    def get_review(self, obj):
+        content = Content.objects.all()[0]
+        link = content.link
+        return link

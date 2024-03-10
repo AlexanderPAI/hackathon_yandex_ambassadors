@@ -12,7 +12,7 @@ from .promo_views import (
     PromocodeViewSet,
 )
 from .user_actions_views import UserActionsViewSet
-from api.content_views import ContentViewSet, GuideKitViewSet, GuideTaskViewSet, GuideViewSet, MerchPhotoViewSet
+from api.content_views import ContentViewSet, ContentPageViewSet, GuideKitViewSet, GuideTaskViewSet, GuideViewSet, MerchPhotoViewSet
 
 app_name = "api"
 
@@ -39,6 +39,7 @@ router.register("merch_photo", MerchPhotoViewSet)
 # Content
 router.register("merch_photo", MerchPhotoViewSet)
 router.register("content", ContentViewSet)
+router.register("content_page", ContentPageViewSet)
 
 
 urlpatterns = [

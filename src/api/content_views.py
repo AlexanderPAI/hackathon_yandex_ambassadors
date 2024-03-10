@@ -1,8 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
 
 from api.mixins import DestroyWithPayloadMixin
-from api.content_serializers import ContentSerializer, GuideSerializer, GuideCreateUpdateSerializer, GuideKitSerializer, GuideTaskSerializer, GuideKitCreateUpdateSerializer, MerchPhotoSerializer
+from api.content_serializers import ContentSerializer, ContentCreateUpdateSerializer, GuideSerializer, GuideCreateUpdateSerializer, GuideKitSerializer, GuideTaskSerializer, GuideKitCreateUpdateSerializer, MerchPhotoSerializer, ContentPageSerialzier
 
+from ambassadors.models import Ambassador
 from content.models import Content, Guide, GuideKit, GuideTask, MerchPhoto
 
 
@@ -52,7 +53,18 @@ class ContentViewSet(DestroyWithPayloadMixin, ModelViewSet):
             content_obj = content_obj.filter(ambassador=ambassador)
         return content_obj
 
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'partial_update':
+            return ContentCreateUpdateSerializer
+        return ContentSerializer
 
-# class ContentPageViewSet(ModelViewSet):
-#     """Представление для страницы контент со списком амбассадоров."""
-#     queryset = Ambassador.objects.all()
+
+class ContentPageViewSet(ModelViewSet):
+    """Представление для страницы контент со списком амбассадоров."""
+    queryset = Ambassador.objects.all()
+    serializer_class = ContentPageSerialzier
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'partial_update':
+            return ContentCreateUpdateSerializer
+        return ContentSerializer
