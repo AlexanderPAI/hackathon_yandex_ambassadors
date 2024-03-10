@@ -210,7 +210,7 @@ class ContentUpdateSerializer(serializers.ModelSerializer):
             "image",
         )
 
-
+# Перенести в Create
     def create(self, validated_data):
         is_guide_content = False
         is_guide_content_field = validated_data.pop("is_guide_content")
@@ -247,6 +247,7 @@ class ContentPageSerialzier(serializers.ModelSerializer):
             "telegram_id",
             "review",
             "content",
+            "comment",
         )
 
     def get_review(self, obj):
@@ -260,3 +261,31 @@ class ContentPageSerialzier(serializers.ModelSerializer):
         if content:
             return content[0].link
         return "Еще нет контента"
+
+
+# class ContentPageUpdateSerializer(ContentPageSerialzier):
+#     review = serializers.URLField()
+#     content = serializers.URLField()
+#
+#     def update(self, instance, validated_data):
+#         review = self.__getitem__("review").value
+#         content = self.__getitem__("content").value
+#         print(validated_data)
+#         if "review" in validated_data or "content" in validated_data:
+#             if review != "Еще нет отзывов":
+#                 pass
+#             if content != "Еще нет контента":
+#                 content_obj = instance.content.filter(link=content)
+#                 print(validated_data["content"])
+#                 content_obj(link=validated_data["content"]).save()
+#         field = self.__getitem__("content")
+#         # if "review" in validated_data or "content" in validated_data:
+#         #     if self.review != 'Еще нет отзывов':
+#         #         review = instance.content.filter(link=self.review)
+#         #         review(link=validated_data["review"]).save()
+#         #     if self.content != 'Еще нет контента':
+#         #         print(self.content)
+#         #         print(validated_data["content"])
+#         #         content = instance.content.filter(link=self.content)
+#         #         content(link=validated_data["content"]).save()
+#         return super().update(instance, validated_data)

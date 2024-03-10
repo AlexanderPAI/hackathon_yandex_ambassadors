@@ -5,6 +5,7 @@ from api.content_serializers import (
     ContentCreateSerializer,
     ContentUpdateSerializer,
     ContentPageSerialzier,
+    # ContentPageUpdateSerializer,
     ContentSerializer,
     GuideCreateUpdateSerializer,
     GuideKitCreateUpdateSerializer,
@@ -80,3 +81,9 @@ class ContentPageViewSet(ModelViewSet):
 
     queryset = Ambassador.objects.all()
     serializer_class = ContentPageSerialzier
+    http_method_names = ['get', 'patch']
+
+    # def get_serializer_class(self):
+    #     if self.action == 'partial_update':
+    #         return ContentPageUpdateSerializer
+    #     return ContentPageSerialzier
