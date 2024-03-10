@@ -22,9 +22,6 @@ class Purpose(CommonAbstractModel):
     """Describes Purpose entity"""
 
     name = models.CharField(max_length=75, verbose_name="Цель в Практикуме")
-    personal_purpose = models.TextField(
-        null=True, blank=True, verbose_name="Moя цель в Практикуме"
-    )
 
     class Meta:
         verbose_name = "Цель"
@@ -177,9 +174,7 @@ class Ambassador(models.Model):
         verbose_name_plural = "Амбассадоры"
 
     def __str__(self):
-        return (
-            f"{self.name} ({self.status}) {self.tutor} {self.program} {self.email}"
-        )
+        return self.name
 
 
 class AmbassadorActivity(models.Model):
@@ -204,4 +199,8 @@ class AmbassadorPurpose(models.Model):
 
     purpose = models.ForeignKey(
         Purpose, on_delete=models.CASCADE
+    )
+
+    personal_purpose = models.TextField(
+        null=True, blank=True, verbose_name="Moя цель в Практикуме"
     )

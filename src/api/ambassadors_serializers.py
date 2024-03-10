@@ -4,14 +4,17 @@ from ambassadors.models import (
     Activity,
     Address,
     Ambassador,
+    AmbassadorPurpose,
     AmbassadorActivity,
     Program,
     Purpose,
+    Status,
 )
 
 
 class AddressSerializer(serializers.ModelSerializer):
     """Serializer for Address model."""
+
     class Meta:
         model = Address
         fields = (
@@ -25,29 +28,53 @@ class AddressSerializer(serializers.ModelSerializer):
 
 class ActivitySerializer(serializers.ModelSerializer):
     """Serializer for Activity model."""
+
     class Meta:
         model = Activity
-        fields = (
-            "id",
-            "name",
-        )
+        fields = ("id", "name",)
 
 
 class ProgramSerializer(serializers.ModelSerializer):
     """Serializer for Program model"""
+
     class Meta:
         model = Program
-        fields = (
-            "id",
-            "name",
-        )
+        fields = ("id", "name",)
 
 
 class PurposeSerializer(serializers.ModelSerializer):
     """Serializer for Purpose model"""
+
     class Meta:
         model = Purpose
+        fields = ("id", "name")
+
+
+class AmbassadorPurposeSerializer(serializers.ModelSerializer):
+    """Serializer for AmbassadorPurpose model"""
+
+    id = serializers.ReadOnlyField(source='purpose.id')
+    name = serializers.CharField(source='purpose.name')
+    personal_purpose = serializers.CharField(source='purpose.personal_purpose')
+
+    class Meta:
+        model = AmbassadorPurpose
         fields = ("id", "name", "personal_purpose",)
+
+
+class AmbassadorPurposeCreateSerializer(serializers.ModelSerializer):
+    """Serializer for create AmbassadorPurpose model."""
+
+    id = serializers.PrimaryKeyRelatedField(
+        source='purpose',
+        queryset=Purpose.objects.all()
+    )
+
+    personal_purpose = serializers.CharField()
+
+    class Meta:
+        model = AmbassadorPurpose
+        fields = ("id", "personal_purpose",)
 
 
 class AmbassadorReadSerializer(serializers.ModelSerializer):
@@ -97,9 +124,16 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
 class AmbassadorCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating Ambassador model"""
     activity = ActivitySerializer(many=True)
-    address = AddressSerializer(required=False)
     purpose = PurposeSerializer()
-    program = ProgramSerializer()
+    address = AddressSerializer()
+    # program = ProgramSerializer()
+
+    # purpose = PurposeSerializer()
+    # program = ProgramSerializer()
+
+    program = serializers.SlugRelatedField(slug_field="name", read_only=True)
+
+    # status = serializers.SlugRelatedField(slug_field="slug", read_only=True)
 
     class Meta:
         model = Ambassador
@@ -119,18 +153,31 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
             "about_me",
             "program",
             "address",
+            "status",
         )
 
     def create(self, validated_data):
-        program_data = validated_data.pop("program")
-        purpose_data = validated_data.pop("purpose")
+        print(self.initial_data)
+        print("-------------------------------------------")
+        print("-------------------------------------------")
+        print(validated_data)
+        print("-------------------------------------------")
+        print("-------------------------------------------")
+        print("-------------------------------------------")
+        print("-------------------------------------------")
+        print("-------------------------------------------")
+        print("-------------------------------------------")
+        # program = Program.objects.get_or_create(name=program_data["name"])
         activities = validated_data.pop("activity")
         address = Address.objects.create(**validated_data.pop("address"))
-        ambassador_program = Program.objects.get_or_create(**program_data)[0]
-        ambassador_purpose = Purpose.objects.get_or_create(**purpose_data)[0]
-        validated_data["program"] = ambassador_program
-        validated_data["purpose"] = ambassador_purpose
+        # ambassador_program = Program.objects.get_or_create(**program_data)[0]
+        # ambassador_purpose = Purpose.objects.get_or_create(**purpose_data)[0]
+        # validated_data["program"] = ambassador_program
+        # validated_data["purpose"] = ambassador_purpose
+        purpose, status = Purpose.objects.get_or_create(**validated_data.pop("purpose"))
         ambassador = Ambassador.objects.create(**validated_data, address=address)
+
+        AmbassadorPurpose(ambassador=ambassador, purpose=purpose).save()
 
         for activity in activities:
             activity = Activity.objects.get_or_create(**activity)[0]
@@ -158,12 +205,13 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
         instance.onboarding_status = validated_data.pop(
             "onboarding_status", instance.onboarding_status
         )
-        instance.purpose = validated_data.pop("purpose", instance.purpose)
         instance.about_me = validated_data.pop("about_me", instance.about_me)
-        instance.tutor = validated_data.pop("tutor", instance.tutor)
+
         instance.status = validated_data.pop("status", instance.status)
         instance.program = validated_data.pop("program", instance.program)
         instance.address = validated_data.pop("address", instance.address)
+        instance.purpose = validated_data.pop("purpose", instance.purpose)
+        instance.tutor = validated_data.pop("tutor", instance.tutor)
 
         if "activity" in validated_data:
             AmbassadorActivity.objects.filter(ambassador=instance).all().delete()
@@ -178,3 +226,25 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return AmbassadorReadSerializer(instance, context=self.context).data
+
+# class AmbassadorUpdateSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Ambassador
+#         fields = (
+#             "name",
+#             "gender",
+#             "clothing_size",
+#             "shoe_size",
+#             "education",
+#             "job",
+#             "email",
+#             "phone_number",
+#             "telegram_id",
+#             "activity",
+#             "blog_link",
+#             "purpose",
+#             "about_me",
+#             "program",
+#             "address",
+#             "status",
+#         )
