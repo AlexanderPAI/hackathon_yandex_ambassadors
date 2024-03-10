@@ -230,6 +230,7 @@ class ContentPageSerialzier(serializers.ModelSerializer):
     class Meta:
         model = Ambassador
         fields = (
+            "id",
             "name",
             "telegram_id",
             "review",
