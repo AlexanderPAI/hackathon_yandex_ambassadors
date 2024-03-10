@@ -11,6 +11,7 @@ from ambassadors.models import (
 
 
 class AddressSerializer(serializers.ModelSerializer):
+    """Serializer for Address model."""
     class Meta:
         model = Address
         fields = (
@@ -23,6 +24,7 @@ class AddressSerializer(serializers.ModelSerializer):
 
 
 class ActivitySerializer(serializers.ModelSerializer):
+    """Serializer for Activity model."""
     class Meta:
         model = Activity
         fields = (
@@ -32,6 +34,7 @@ class ActivitySerializer(serializers.ModelSerializer):
 
 
 class ProgramSerializer(serializers.ModelSerializer):
+    """Serializer for Program model"""
     class Meta:
         model = Program
         fields = (
@@ -41,16 +44,18 @@ class ProgramSerializer(serializers.ModelSerializer):
 
 
 class PurposeSerializer(serializers.ModelSerializer):
+    """Serializer for Purpose model"""
     class Meta:
         model = Purpose
-        fields = ("id", "name", "personal_purpose")
+        fields = ("id", "name", "personal_purpose",)
 
 
 class AmbassadorReadSerializer(serializers.ModelSerializer):
+    """Serializer for reading Ambassador model"""
     activity = ActivitySerializer(read_only=True, many=True)
     address = AddressSerializer(read_only=True)
-    purpose = serializers.StringRelatedField(read_only=True)
-    program = serializers.StringRelatedField(read_only=True)
+    purpose = PurposeSerializer(read_only=True)
+    program = ProgramSerializer(read_only=True)
     tutor = serializers.StringRelatedField(read_only=True)
     status = serializers.StringRelatedField(read_only=True)
 
@@ -90,6 +95,7 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
 
 
 class AmbassadorCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating Ambassador model"""
     activity = ActivitySerializer(many=True)
     address = AddressSerializer(required=False)
     purpose = PurposeSerializer()
@@ -124,13 +130,51 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
         ambassador_purpose = Purpose.objects.get_or_create(**purpose_data)[0]
         validated_data["program"] = ambassador_program
         validated_data["purpose"] = ambassador_purpose
-
         ambassador = Ambassador.objects.create(**validated_data, address=address)
 
         for activity in activities:
             activity = Activity.objects.get_or_create(**activity)[0]
             AmbassadorActivity(ambassador=ambassador, activity=activity).save()
         return ambassador
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.pop("name", instance.name)
+        instance.gender = validated_data.pop("gender", instance.gender)
+        instance.clothing_size = validated_data.pop(
+            "clothing_size", instance.clothing_size
+        )
+        instance.shoe_size = validated_data.pop("shoe_size", instance.shoe_size)
+        instance.education = validated_data.pop("education", instance.education)
+        instance.job = validated_data.pop("job", instance.job)
+        instance.email = validated_data.pop("email", instance.email)
+        instance.phone_number = validated_data.pop(
+            "phone_number", instance.phone_number
+        )
+        instance.telegram_id = validated_data.pop(
+            "telegram_id", instance.telegram_id
+        )
+        instance.whatsapp = validated_data.pop("whatsapp", instance.whatsapp)
+        instance.blog_link = validated_data.pop("blog_link", instance.blog_link)
+        instance.onboarding_status = validated_data.pop(
+            "onboarding_status", instance.onboarding_status
+        )
+        instance.purpose = validated_data.pop("purpose", instance.purpose)
+        instance.about_me = validated_data.pop("about_me", instance.about_me)
+        instance.tutor = validated_data.pop("tutor", instance.tutor)
+        instance.status = validated_data.pop("status", instance.status)
+        instance.program = validated_data.pop("program", instance.program)
+        instance.address = validated_data.pop("address", instance.address)
+
+        if "activity" in validated_data:
+            AmbassadorActivity.objects.filter(ambassador=instance).all().delete()
+            for activity in validated_data["activity"]:
+                activity, status = Activity.objects.get_or_create(name=activity["name"])
+                AmbassadorActivity(
+                    ambassador=instance,
+                    activity=activity
+                ).save()
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
         return AmbassadorReadSerializer(instance, context=self.context).data
