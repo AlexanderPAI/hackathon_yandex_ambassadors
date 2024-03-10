@@ -22,7 +22,11 @@ SPREADSHEET_PRIVATE_ID = "1l43PvR4rRxh-Umu7zeeRMO_XYJAzf75ZJhjGBgtr-5A"
 CELL_RANGE = "{sheet_name}!{cells}"  # cells pattern example: 'A1:D5'
 API_KEY = os.getenv("GOOGLE_API_KEY")
 
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/drive.file",
+]
 
 
 def authenticate_sheets_by_api_key(api_key: str):
@@ -147,10 +151,13 @@ def create_new_sheet_example(title: str) -> str:
 def create_merch_applications_sheet(all_applications_qs) -> str:
     """Creates a new spreadsheet and writes a list of merch applications into it."""
     try:
-        service = build(
+        service_sheets = build(
             "sheets", "v4", credentials=authenticate_sheets_by_oauth_credentials()
         )
-        sheets = service.spreadsheets()
+        service_drive = build(
+            "drive", "v3", credentials=authenticate_sheets_by_oauth_credentials()
+        )
+        sheets = service_sheets.spreadsheets()
         worksheet_name = "Заявки на мерч"
         spreadsheet_properties = {
             "properties": {
@@ -164,6 +171,11 @@ def create_merch_applications_sheet(all_applications_qs) -> str:
         logger.debug("Empty spreadsheet for merch applications created")
 
         spreadsheet_id = spreadsheet.get("spreadsheetId")
+        service_drive.permissions().create(
+            fileId=spreadsheet_id, body={"type": "anyone", "role": "reader"}
+        ).execute()
+        logger.debug("Permission created for anyone, role - reader")
+
         column_names = [
             (
                 "id заявки",
@@ -252,10 +264,13 @@ def create_merch_applications_sheet(all_applications_qs) -> str:
 def create_promocodes_sheet(all_promocodes_qs) -> str:
     """Creates a new spreadsheet and writes a list of promocodes into it."""
     try:
-        service = build(
+        service_sheets = build(
             "sheets", "v4", credentials=authenticate_sheets_by_oauth_credentials()
         )
-        sheets = service.spreadsheets()
+        service_drive = build(
+            "drive", "v3", credentials=authenticate_sheets_by_oauth_credentials()
+        )
+        sheets = service_sheets.spreadsheets()
         worksheet_name = "Промокоды"
         spreadsheet_properties = {
             "properties": {
@@ -269,6 +284,11 @@ def create_promocodes_sheet(all_promocodes_qs) -> str:
         logger.debug("Empty spreadsheet for merch applications created")
 
         spreadsheet_id = spreadsheet.get("spreadsheetId")
+        service_drive.permissions().create(
+            fileId=spreadsheet_id, body={"type": "anyone", "role": "reader"}
+        ).execute()
+        logger.debug("Permission created for anyone, role - reader")
+
         column_names = [
             (
                 "id промокода",
