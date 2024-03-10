@@ -14,7 +14,7 @@ from content.models import (
 )
 
 
-def get_platfrom(link):
+def get_content_platfrom(link):
     platform = link[:]
     if "//" in platform:
         platform = platform.split("//")[1].split("/")
@@ -26,7 +26,7 @@ def get_platfrom(link):
     return platform.split("/")[0]
 
 
-def get_type(platform):
+def get_content_type(platform):
     reviews_platforms = [
         "career.habr.com",
         "sravni.ru",
@@ -193,6 +193,7 @@ class ContentSerializer(serializers.ModelSerializer):
 
 class ContentUpdateSerializer(serializers.ModelSerializer):
     """Сериализатор обновления контента."""
+
     image = Base64ImageField(required=False)
 
     class Meta:
@@ -216,8 +217,8 @@ class ContentUpdateSerializer(serializers.ModelSerializer):
         if is_guide_content_field == 'Да':
             is_guide_content = True
         link = validated_data["link"]
-        platform = get_platfrom(link)
-        type = get_type(platform)
+        platform = get_content_platfrom(link)
+        type = get_content_type(platform)
         return Content.objects.create(
             **validated_data,
             is_guide_content=is_guide_content,
@@ -228,6 +229,7 @@ class ContentUpdateSerializer(serializers.ModelSerializer):
 
 class ContentCreateSerializer(ContentUpdateSerializer):
     """Сериализатор для создания контента из ЯФормы."""
+
     is_guide_content = serializers.CharField()
 
 
