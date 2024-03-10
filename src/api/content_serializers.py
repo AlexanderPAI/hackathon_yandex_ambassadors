@@ -191,10 +191,11 @@ class ContentSerializer(serializers.ModelSerializer):
         )
 
 
-class ContentCreateUpdateSerializer(serializers.ModelSerializer):
+class ContentCreateSerializer(serializers.ModelSerializer):
     """Сериализатор создания контента."""
 
     image = Base64ImageField(required=False)
+    is_guide_content = serializers.CharField()
 
     class Meta:
         model = Content
@@ -210,12 +211,18 @@ class ContentCreateUpdateSerializer(serializers.ModelSerializer):
             "image",
         )
 
+
     def create(self, validated_data):
+        is_guide_content = False
+        is_guide_content_field = validated_data.pop("is_guide_content")
+        if is_guide_content_field == 'Да':
+            is_guide_content = True
         link = validated_data["link"]
         platform = get_platfrom(link)
         type = get_type(platform)
         return Content.objects.create(
             **validated_data,
+            is_guide_content=is_guide_content,
             platform=platform,
             type=type,
         )
