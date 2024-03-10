@@ -191,11 +191,9 @@ class ContentSerializer(serializers.ModelSerializer):
         )
 
 
-class ContentCreateSerializer(serializers.ModelSerializer):
-    """Сериализатор создания контента."""
-
+class ContentUpdateSerializer(serializers.ModelSerializer):
+    """Сериализатор обновления контента."""
     image = Base64ImageField(required=False)
-    is_guide_content = serializers.CharField()
 
     class Meta:
         model = Content
@@ -226,6 +224,11 @@ class ContentCreateSerializer(serializers.ModelSerializer):
             platform=platform,
             type=type,
         )
+
+
+class ContentCreateSerializer(ContentUpdateSerializer):
+    """Сериализатор для создания контента из ЯФормы."""
+    is_guide_content = serializers.CharField()
 
 
 class ContentPageSerialzier(serializers.ModelSerializer):

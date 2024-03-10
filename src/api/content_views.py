@@ -3,6 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from ambassadors.models import Ambassador
 from api.content_serializers import (
     ContentCreateSerializer,
+    ContentUpdateSerializer,
     ContentPageSerialzier,
     ContentSerializer,
     GuideCreateUpdateSerializer,
@@ -70,7 +71,7 @@ class ContentViewSet(DestroyWithPayloadMixin, ModelViewSet):
         if self.action == "create":
             return ContentCreateSerializer
         if self.action == "partial_update":
-            return ContentSerializer
+            return ContentUpdateSerializer
         return ContentSerializer
 
 
