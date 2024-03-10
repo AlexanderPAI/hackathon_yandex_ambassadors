@@ -235,7 +235,7 @@ class ContentCreateSerializer(ContentUpdateSerializer):
 class ContentPageSerialzier(serializers.ModelSerializer):
     """Сериализатор для страницы Контент."""
 
-    review = serializers.SerializerMethodField()
+    review = ContentSerializer()
     content = serializers.SerializerMethodField()
     sending_merch = serializers.SerializerMethodField()
     guide_status = serializers.SerializerMethodField()
@@ -253,11 +253,11 @@ class ContentPageSerialzier(serializers.ModelSerializer):
             "guide_status",
         )
 
-    def get_review(self, obj):
-        review = obj.content.filter(type="review")
-        if review:
-            return review[0].link
-        return "Еще нет отзывов"
+    # def get_review(self, obj):
+    #     review = obj.content.filter(type="review")
+    #     if review:
+    #         return review[0].link
+    #     return "Еще нет отзывов"
 
     def get_content(self, obj):
         content = obj.content.filter(type="content")
@@ -287,35 +287,9 @@ class ContentPageSerialzier(serializers.ModelSerializer):
             return 2
         return 2
 
-    def get_guide_status(self, obj):
-        try:
-            guide = Guide.objects.get(ambassador=obj)
-            return guide.status
-        except:
-            return "There is no guide"
-
-
-# class ContentPageUpdateSerializer(ContentPageSerialzier):
-#
-#     def update(self, instance, validated_data):
-#         review = self.__getitem__("review").value
-#         content = self.__getitem__("content").value
-#         content_field = validated_data.pop("content")
-#         print(validated_data)
-#         # if "review" in validated_data or "content" in validated_data:
-#         #     if review != "Еще нет отзывов":
-#         #         pass
-#         #     if content != "Еще нет контента":
-#         #         content_obj = instance.content.filter(link=content)
-#         #         print(validated_data["content"])
-#         #         content_obj(link=validated_data["content"]).save()
-#         # if "review" in validated_data or "content" in validated_data:
-#         #     if self.review != 'Еще нет отзывов':
-#         #         review = instance.content.filter(link=self.review)
-#         #         review(link=validated_data["review"]).save()
-#         #     if self.content != 'Еще нет контента':
-#         #         print(self.content)
-#         #         print(validated_data["content"])
-#         #         content = instance.content.filter(link=self.content)
-#         #         content(link=validated_data["content"]).save()
-#         return super().update(instance, validated_data)
+    # def get_guide_status(self, obj):
+    #     try:
+    #         guide = Guide.objects.get(ambassador=obj)
+    #         return guide.status
+    #     except:
+    #         return "There is no guide"

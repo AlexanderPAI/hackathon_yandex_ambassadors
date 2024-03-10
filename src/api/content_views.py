@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 
 from ambassadors.models import Ambassador
-from api.content_serializers import (  # ContentPageUpdateSerializer,
+from api.content_serializers import (
     ContentCreateSerializer,
     ContentPageSerialzier,
     ContentSerializer,
