@@ -186,6 +186,7 @@ class ContentSerializer(serializers.ModelSerializer):
             "ambassador",
             "platform",
             "type",
+            "comment",
             "image",
         )
 
@@ -205,6 +206,7 @@ class ContentCreateUpdateSerializer(serializers.ModelSerializer):
             "ambassador",
             "platform",
             "type",
+            "comment",
             "image",
         )
 
