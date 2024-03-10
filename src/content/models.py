@@ -162,11 +162,7 @@ class Content(models.Model):
         blank=True,
         verbose_name="Изображение",
     )
-    comment = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name="Комментарий",
-    )
+
 
     class Meta:
         verbose_name = "Контент"
