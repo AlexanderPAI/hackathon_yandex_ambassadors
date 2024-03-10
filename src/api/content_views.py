@@ -47,6 +47,14 @@ class GuideViewSet(DestroyWithPayloadMixin, ModelViewSet):
             return GuideCreateUpdateSerializer
         return GuideSerializer
 
+    def get_queryset(self):
+        params = self.request.query_params
+        if "ambassador" in params:
+            return Guide.objects.filter(
+                ambassador=params["ambassador"],
+            )
+        return Guide.objects.all()
+
 
 class MerchPhotoViewSet(DestroyWithPayloadMixin, ModelViewSet):
     """Преставление для сущности Фото в мерче."""
