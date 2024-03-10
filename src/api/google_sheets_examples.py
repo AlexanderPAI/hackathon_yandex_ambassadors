@@ -195,53 +195,53 @@ def create_merch_applications_sheet(all_applications_qs) -> str:
 
         all_applications_list = list(all_applications_qs)
         for row in range(2, len(all_applications_list) + 2):
-            item = all_applications_list.pop()
-            merch_inside = item.merch_in_applications.all()
-            if not merch_inside:
-                logger.error("Application without merch items inside")
-
-            merch_name = (
-                item.merch_in_applications.all()[0].merch.name
-                if merch_inside
-                else "Заявка без мерча"
-            )
-            merch_size = (
-                item.merch_in_applications.all()[0].merch.size if merch_inside else "-"
-            )
-            merch_quantity = (
-                item.merch_in_applications.all()[0].quantity if merch_inside else 0
-            )
-
-            values = [
-                (
-                    item.id,
-                    item.application_number,
-                    item.tutor.get_full_name(),
-                    merch_name,
-                    merch_size,
-                    merch_quantity,
-                    item.ambassador.clothing_size,
-                    item.ambassador.shoe_size,
-                    item.ambassador.name,
-                    item.ambassador.address.postal_code,
-                    item.ambassador.address.country,
-                    item.ambassador.address.city,
-                    item.ambassador.address.street,
-                    item.ambassador.phone_number,
-                    item.created.isoformat(),
-                    YEAR_MONTHS[item.created.month - 1][2],
-                )
-            ]
             try:
+                item = all_applications_list.pop()
+                merch_inside = item.merch_in_applications.all()
+                if not merch_inside:
+                    logger.error("Application without merch items inside")
+                merch_name = (
+                    item.merch_in_applications.all()[0].merch.name
+                    if merch_inside
+                    else "Заявка без мерча"
+                )
+                merch_size = (
+                    item.merch_in_applications.all()[0].merch.size
+                    if merch_inside
+                    else "-"
+                )
+                merch_quantity = (
+                    item.merch_in_applications.all()[0].quantity if merch_inside else 0
+                )
+                values = [
+                    (
+                        item.id,
+                        item.application_number,
+                        item.tutor.get_full_name(),
+                        merch_name,
+                        merch_size,
+                        merch_quantity,
+                        item.ambassador.clothing_size,
+                        item.ambassador.shoe_size,
+                        item.ambassador.name,
+                        item.ambassador.address.postal_code,
+                        item.ambassador.address.country,
+                        item.ambassador.address.city,
+                        item.ambassador.address.street,
+                        item.ambassador.phone_number,
+                        item.created.isoformat(),
+                        YEAR_MONTHS[item.created.month - 1][2],
+                    )
+                ]
                 sheets.values().update(
                     spreadsheetId=spreadsheet_id,
                     valueInputOption="RAW",
                     range=f"{worksheet_name}!A{row}",
                     body={"values": values},
                 ).execute()
-            except Exception as e:
-                logger.error(f"item - {item}, error - {str(e)}")
-                raise e
+            except Exception as error:
+                logger.error(f"item - {item}, error - {str(error)}")
+                return error
 
         return spreadsheet.get("spreadsheetUrl")
     except HttpError as error:
@@ -290,28 +290,27 @@ def create_promocodes_sheet(all_promocodes_qs) -> str:
 
         all_promocodes_qs = list(all_promocodes_qs)
         for row in range(2, len(all_promocodes_qs) + 2):
-            item = all_promocodes_qs.pop()
-
-            values = [
-                (
-                    item.id,
-                    item.code,
-                    item.is_active,
-                    item.ambassador.name,
-                    item.ambassador.status.name,
-                    item.ambassador.telegram_id,
-                )
-            ]
             try:
+                item = all_promocodes_qs.pop()
+                values = [
+                    (
+                        item.id,
+                        item.code,
+                        item.is_active,
+                        item.ambassador.name,
+                        item.ambassador.status.name,
+                        item.ambassador.telegram_id,
+                    )
+                ]
                 sheets.values().update(
                     spreadsheetId=spreadsheet_id,
                     valueInputOption="RAW",
                     range=f"{worksheet_name}!A{row}",
                     body={"values": values},
                 ).execute()
-            except Exception as e:
-                logger.error(f"item - {item}, error - {str(e)}")
-                raise e
+            except Exception as error:
+                logger.error(f"item - {item}, error - {str(error)}")
+                return error
 
         return spreadsheet.get("spreadsheetUrl")
     except HttpError as error:

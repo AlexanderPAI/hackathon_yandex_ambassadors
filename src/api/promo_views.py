@@ -6,6 +6,7 @@ from drf_standardized_errors.openapi_serializers import (
     ErrorResponse401Serializer,
     ErrorResponse403Serializer,
     ErrorResponse404Serializer,
+    ValidationErrorEnum,
     ValidationErrorResponseSerializer,
 )
 from drf_yasg import openapi
@@ -174,7 +175,11 @@ ambassadors = openapi.Parameter(
     name="export_to_google_sheet",
     decorator=swagger_auto_schema(
         operation_summary="Export to Google sheet",
-        responses={200: GoogleSheetAPISerializer},
+        responses={
+            200: GoogleSheetAPISerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
     ),
 )
 class MerchApplicationViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
@@ -321,8 +326,19 @@ class MerchApplicationViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
             context={"request": request, "format": self.format_kwarg, "view": self},
         )
         if not serializer.is_valid():
+            payload = {
+                "type": ValidationErrorEnum.VALIDATION_ERROR,
+                "errors": [
+                    {
+                        "code": "invalid",
+                        "detail": serializer.errors["link"][0],
+                        "attr": "link",
+                    }
+                ],
+            }
             return response.Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                ValidationErrorResponseSerializer(payload).data,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -609,7 +625,11 @@ class MerchViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
     name="export_to_google_sheet",
     decorator=swagger_auto_schema(
         operation_summary="Export to Google sheet",
-        responses={200: GoogleSheetAPISerializer},
+        responses={
+            200: GoogleSheetAPISerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponse401Serializer,
+        },
     ),
 )
 class PromocodeViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
@@ -658,7 +678,18 @@ class PromocodeViewSet(DestroyWithPayloadMixin, viewsets.ModelViewSet):
             context={"request": request, "format": self.format_kwarg, "view": self},
         )
         if not serializer.is_valid():
+            payload = {
+                "type": ValidationErrorEnum.VALIDATION_ERROR,
+                "errors": [
+                    {
+                        "code": "invalid",
+                        "detail": serializer.errors["link"][0],
+                        "attr": "link",
+                    }
+                ],
+            }
             return response.Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                ValidationErrorResponseSerializer(payload).data,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         return response.Response(serializer.data, status=status.HTTP_200_OK)

@@ -11,6 +11,7 @@ from api.content_serializers import (
 from content.models import Guide, GuideKit, GuideStatus, GuideTask
 
 
+# TODO: duplicate queries in guide kits
 class GuideTaskViewSet(ModelViewSet):
     """Представление задачи для гайда."""
 
@@ -30,6 +31,7 @@ class GuideKitViewSet(ModelViewSet):
         return GuideKitSerializer
 
 
+# TODO: duplicate queries guide status?
 class GuideStatusViewSet(ModelViewSet):
     """Представление статуса гайда."""
 
@@ -37,6 +39,7 @@ class GuideStatusViewSet(ModelViewSet):
     serializer_class = GuideStatusSerializer
 
 
+# TODO: duplicate queries guides?
 class GuideViewSet(ModelViewSet):
     """Представление гайда."""
 
