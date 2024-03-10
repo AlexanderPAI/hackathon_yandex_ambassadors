@@ -1,6 +1,47 @@
+import base64
+
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from content.models import Guide, GuideKit, GuideStatus, GuideTask, GuideTaskGuideKit
+from ambassadors.models import Ambassador
+from content.models import (
+    Content,
+    Guide,
+    GuideKit,
+    GuideTask,
+    GuideTaskGuideKit,
+    MerchPhoto,
+)
+
+
+def get_platfrom(link):
+    platform = link[:]
+    if "//" in platform:
+        platform = platform.split("//")[1].split("/")
+        if "www." in platform[0]:
+            platform[0] = platform[0].replace("www.", "")
+        if "yandex" in platform[0] or "google" in platform[0]:
+            return platform[0] + "/" + platform[1]
+        return platform[0]
+    return platform.split("/")[0]
+
+
+def get_type(platform):
+    reviews_platforms = [
+        "career.habr.com",
+        "sravni.ru",
+        "tutortop.ru",
+        "irecommend.ru",
+        "journal.tinkoff.ru",
+        "mooc.ru",
+        "katalog-kursov.ru",
+        "otzovik.com",
+        "yandex.ru/maps/",
+        "google.com/maps",
+    ]
+    if platform in reviews_platforms:
+        return "review"
+    return "content"
 
 
 class GuideTaskSerializer(serializers.ModelSerializer):
@@ -87,14 +128,6 @@ class GuideKitCreateUpdateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class GuideStatusSerializer(serializers.ModelSerializer):
-    """Сериализатор статуса гайда."""
-
-    class Meta:
-        model = GuideStatus
-        fields = "__all__"
-
-
 class GuideSerializer(serializers.ModelSerializer):
     """Сериализатор гайда."""
 
@@ -115,3 +148,103 @@ class GuideCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Guide
         fields = "__all__"
+
+
+class Base64ImageField(serializers.ImageField):
+    """Сериазитор для декодирования изображения."""
+
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith("data:image"):
+            format, imgstr = data.split(";base64")
+            ext = format.split("/")[-1]
+            data = ContentFile(base64.b64decode(imgstr), name="temp." + ext)
+        return super().to_internal_value(data)
+
+
+class MerchPhotoSerializer(serializers.ModelSerializer):
+    """Сериализатор для Фото в мерче."""
+
+    photo = Base64ImageField()
+
+    class Meta:
+        model = MerchPhoto
+        fields = "__all__"
+
+
+class ContentSerializer(serializers.ModelSerializer):
+    """Сериализтор контента."""
+
+    image = Base64ImageField(required=False)
+
+    class Meta:
+        model = Content
+        fields = (
+            "id",
+            "created",
+            "link",
+            "is_guide_content",
+            "ambassador",
+            "platform",
+            "type",
+            "comment",
+            "image",
+        )
+
+
+class ContentCreateUpdateSerializer(serializers.ModelSerializer):
+    """Сериализатор создания контента."""
+
+    image = Base64ImageField(required=False)
+
+    class Meta:
+        model = Content
+        fields = (
+            "id",
+            "created",
+            "link",
+            "is_guide_content",
+            "ambassador",
+            "platform",
+            "type",
+            "comment",
+            "image",
+        )
+
+    def create(self, validated_data):
+        link = validated_data["link"]
+        platform = get_platfrom(link)
+        type = get_type(platform)
+        return Content.objects.create(
+            **validated_data,
+            platform=platform,
+            type=type,
+        )
+
+
+class ContentPageSerialzier(serializers.ModelSerializer):
+    """Сериализатор для страницы Контент."""
+
+    review = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ambassador
+        fields = (
+            "id",
+            "name",
+            "telegram_id",
+            "review",
+            "content",
+        )
+
+    def get_review(self, obj):
+        review = obj.content.filter(type="review")
+        if review:
+            return review[0].link
+        return "Еще нет отзывов"
+
+    def get_content(self, obj):
+        content = obj.content.filter(type="content")
+        if content:
+            return content[0].link
+        return "Еще нет контента"
