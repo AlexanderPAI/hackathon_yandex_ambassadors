@@ -1,8 +1,6 @@
 import pytest
 from django.urls import reverse
 
-from tests.fixtures import TEST_NUMBER
-
 
 @pytest.mark.django_db
 def test_get_merch_applications_list(
