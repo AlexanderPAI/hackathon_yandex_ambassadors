@@ -40,9 +40,9 @@ jobs:
           cd src
           python -m flake8
       
-     - name: Test with pytest
-       run: |
-         pytest
+      - name: Test with pytest
+        run: |
+          pytest
 
       - name: Send success message
         if: ${{ github.ref != 'refs/heads/main' }}
