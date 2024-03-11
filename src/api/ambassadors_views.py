@@ -7,6 +7,7 @@ from ambassadors.models import Ambassador
 from api.ambassadors_serializers import (
     AmbassadorCreateSerializer,
     AmbassadorReadSerializer,
+    AmbassadorUpdateSerializer,
 )
 
 
@@ -48,7 +49,8 @@ class AmbassadorViewSet(DestroyWithPayloadMixin, ModelViewSet):
         "list": AmbassadorReadSerializer,
         "retrieve": AmbassadorReadSerializer,
         "create": AmbassadorCreateSerializer,
-        "update": AmbassadorCreateSerializer,
+        "update": AmbassadorUpdateSerializer,
+        "partial_update": AmbassadorUpdateSerializer,
     }
 
     def get_serializer_class(self):

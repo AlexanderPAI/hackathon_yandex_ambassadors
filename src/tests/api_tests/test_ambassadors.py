@@ -23,7 +23,7 @@ def test_get_ambassador_list(auth_client, ambassadors):
     assert response.data[0]["purpose"]["name"] == ambassadors[2].purpose.name
     assert response.data[0]["about_me"] is None
     assert response.data[0]["tutor"] is None
-    assert response.data[0]["status"] == ambassadors[2].status.name
+    assert response.data[0]["status"]["name"] == ambassadors[2].status.name
     assert response.data[0]["program"]["name"] == ambassadors[2].program.name
     assert response.data[0]["address"]["street"] == ambassadors[2].address.street
     assert response.data[0]["promocodes"] == []

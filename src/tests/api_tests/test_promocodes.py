@@ -63,7 +63,6 @@ def test_create_promocode(auth_client, ambassadors):
     response = auth_client.post(reverse("api:promocode-list"), payload)
 
     assert response.status_code == 201
-    print(response.data)
     assert response.data["code"] == TEST_NAME
     assert response.data["created"] != ""
     # assert response.data["is_active"] is True  not working

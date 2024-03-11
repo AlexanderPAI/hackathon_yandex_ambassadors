@@ -2,7 +2,13 @@ import pytest
 from rest_framework.test import APIClient
 
 from ambassadors.models import Activity, Address, Ambassador, Program, Purpose, Status
-from promo.models import Merch, MerchCategory, Promocode
+from promo.models import (
+    Merch,
+    MerchApplication,
+    MerchCategory,
+    MerchInApplication,
+    Promocode,
+)
 from users.models import User
 
 TEST_NAME = "Test"
@@ -10,6 +16,7 @@ TEST_SIZE = "XXS"
 TEST_SLUG = "test-test-test"
 TEST_COST = 1000
 TEST_PAST_DATETIME = "2020-03-04T16:20:55+03:00"
+TEST_NUMBER = "QWERTY123"
 
 USER = "test_user"
 USER_EMAIL = "test_user@test.com"
@@ -95,6 +102,10 @@ MERCH_COST_3 = 560
 MERCH_COST_4 = 550
 MERCH_COST_5 = 240
 MERCH_COST_6 = 365
+
+MERCH_APP_NUMBER_1 = "111"
+MERCH_APP_NUMBER_2 = "222"
+MERCH_APP_NUMBER_3 = "333"
 
 
 @pytest.fixture
@@ -290,3 +301,20 @@ def merch(merch_categories):
         cost=MERCH_COST_6,
     )
     return Merch.objects.all()
+
+
+@pytest.fixture
+def merch_applications(user, merch, ambassadors):
+    app_1 = MerchApplication.objects.create(
+        ambassador=ambassadors[0], tutor=user, application_number=MERCH_APP_NUMBER_1
+    )
+    MerchInApplication.objects.create(application=app_1, merch=merch[0], quantity=2)
+    app_2 = MerchApplication.objects.create(
+        ambassador=ambassadors[1], tutor=user, application_number=MERCH_APP_NUMBER_2
+    )
+    MerchInApplication.objects.create(application=app_2, merch=merch[1], quantity=4)
+    app_3 = MerchApplication.objects.create(
+        ambassador=ambassadors[2], tutor=user, application_number=MERCH_APP_NUMBER_3
+    )
+    MerchInApplication.objects.create(application=app_3, merch=merch[2], quantity=10)
+    return MerchApplication.objects.all()
