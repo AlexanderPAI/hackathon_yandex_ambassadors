@@ -7,11 +7,14 @@ from ambassadors.models import (
     AmbassadorActivity,
     Program,
     Purpose,
+    Status,
+    User,
 )
 
 
 class AddressSerializer(serializers.ModelSerializer):
     """Serializer for Address model."""
+
     class Meta:
         model = Address
         fields = (
@@ -25,6 +28,7 @@ class AddressSerializer(serializers.ModelSerializer):
 
 class ActivitySerializer(serializers.ModelSerializer):
     """Serializer for Activity model."""
+
     class Meta:
         model = Activity
         fields = (
@@ -35,6 +39,23 @@ class ActivitySerializer(serializers.ModelSerializer):
 
 class ProgramSerializer(serializers.ModelSerializer):
     """Serializer for Program model"""
+
+    class Meta:
+        model = Program
+        fields = (
+            "id",
+            "name",
+        )
+
+
+class ProgramUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for update Program model"""
+
+    id = serializers.PrimaryKeyRelatedField(
+        source="program",
+        queryset=Program.objects.all()
+    )
+
     class Meta:
         model = Program
         fields = (
@@ -45,9 +66,61 @@ class ProgramSerializer(serializers.ModelSerializer):
 
 class PurposeSerializer(serializers.ModelSerializer):
     """Serializer for Purpose model"""
+
     class Meta:
         model = Purpose
-        fields = ("id", "name", "personal_purpose",)
+        fields = ("id", "name",)
+
+
+class PurposeUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for update Status model"""
+
+    id = serializers.PrimaryKeyRelatedField(
+        source="purpose",
+        queryset=Purpose.objects.all()
+    )
+
+    class Meta:
+        model = Program
+        fields = (
+            "id",
+            "name",
+        )
+
+
+class StatusSerializer(serializers.ModelSerializer):
+    """Serializer for Status model"""
+
+    class Meta:
+        model = Status
+        fields = (
+            "id",
+            "name",
+        )
+
+
+class StatusUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for update Status model"""
+
+    id = serializers.PrimaryKeyRelatedField(
+        source="status",
+        queryset=Status.objects.all()
+    )
+
+    class Meta:
+        model = Program
+        fields = (
+            "id",
+            "name",
+        )
+
+
+class TutorSerializer(serializers.ModelSerializer):
+    """Serializer for User model"""
+
+    class Meta:
+        model = User
+        fields = ("id", "username",)
 
 
 class AmbassadorReadSerializer(serializers.ModelSerializer):
@@ -56,8 +129,8 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
     address = AddressSerializer(read_only=True)
     purpose = PurposeSerializer(read_only=True)
     program = ProgramSerializer(read_only=True)
-    tutor = serializers.StringRelatedField(read_only=True)
-    status = serializers.StringRelatedField(read_only=True)
+    tutor = TutorSerializer(read_only=True)
+    status = StatusSerializer(read_only=True)
 
     class Meta:
         model = Ambassador
@@ -78,6 +151,7 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
             "blog_link",
             "onboarding_status",
             "purpose",
+            "personal_purpose",
             "about_me",
             "tutor",
             "status",
@@ -96,10 +170,12 @@ class AmbassadorReadSerializer(serializers.ModelSerializer):
 
 class AmbassadorCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating Ambassador model"""
+
     activity = ActivitySerializer(many=True)
-    address = AddressSerializer(required=False)
+    address = AddressSerializer()
     purpose = PurposeSerializer()
     program = ProgramSerializer()
+    status = serializers.SlugRelatedField(slug_field="slug", read_only=True)
 
     class Meta:
         model = Ambassador
@@ -116,9 +192,11 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
             "activity",
             "blog_link",
             "purpose",
+            "personal_purpose",
             "about_me",
             "program",
             "address",
+            "status",
         )
 
     def create(self, validated_data):
@@ -130,12 +208,52 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
         ambassador_purpose = Purpose.objects.get_or_create(**purpose_data)[0]
         validated_data["program"] = ambassador_program
         validated_data["purpose"] = ambassador_purpose
-        ambassador = Ambassador.objects.create(**validated_data, address=address)
+        status = Status.objects.get(slug="active")
+        ambassador = Ambassador.objects.create(
+            **validated_data,
+            address=address,
+            status=status
+        )
 
         for activity in activities:
             activity = Activity.objects.get_or_create(**activity)[0]
             AmbassadorActivity(ambassador=ambassador, activity=activity).save()
         return ambassador
+
+    def to_representation(self, instance):
+        return AmbassadorReadSerializer(instance, context=self.context).data
+
+
+class AmbassadorUpdateSerializer(serializers.ModelSerializer):
+    address = AddressSerializer()
+    program = ProgramUpdateSerializer()
+    status = StatusUpdateSerializer()
+    purpose = PurposeUpdateSerializer()
+
+    class Meta:
+        model = Ambassador
+        fields = (
+            "name",
+            "gender",
+            "clothing_size",
+            "shoe_size",
+            "education",
+            "job",
+            "email",
+            "phone_number",
+            "telegram_id",
+            "activity",
+            "blog_link",
+            "onboarding_status",
+            "purpose",
+            "personal_purpose",
+            "about_me",
+            "program",
+            "address",
+            "status",
+            "tutor",
+
+        )
 
     def update(self, instance, validated_data):
         instance.name = validated_data.pop("name", instance.name)
@@ -158,12 +276,24 @@ class AmbassadorCreateSerializer(serializers.ModelSerializer):
         instance.onboarding_status = validated_data.pop(
             "onboarding_status", instance.onboarding_status
         )
-        instance.purpose = validated_data.pop("purpose", instance.purpose)
         instance.about_me = validated_data.pop("about_me", instance.about_me)
         instance.tutor = validated_data.pop("tutor", instance.tutor)
-        instance.status = validated_data.pop("status", instance.status)
-        instance.program = validated_data.pop("program", instance.program)
-        instance.address = validated_data.pop("address", instance.address)
+
+        if "program" in validated_data:
+            instance.program = validated_data.pop("program")["program"]
+
+        if "address" in validated_data:
+            address = validated_data.pop("address")
+            instance.address.postal_code = address["postal_code"]
+            instance.address.country = address["country"]
+            instance.address.city = address["city"]
+            instance.address.street = address["street"]
+
+        if "purpose" in validated_data:
+            instance.purpose = validated_data.pop("purpose")["purpose"]
+
+        if "status" in validated_data:
+            instance.status = validated_data.pop("status")["status"]
 
         if "activity" in validated_data:
             AmbassadorActivity.objects.filter(ambassador=instance).all().delete()

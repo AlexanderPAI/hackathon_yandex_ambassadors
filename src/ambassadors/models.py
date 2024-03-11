@@ -22,9 +22,6 @@ class Purpose(CommonAbstractModel):
     """Describes Purpose entity"""
 
     name = models.CharField(max_length=75, verbose_name="Цель в Практикуме")
-    personal_purpose = models.TextField(
-        null=True, blank=True, verbose_name="Moя цель в Практикуме"
-    )
 
     class Meta:
         verbose_name = "Цель"
@@ -162,24 +159,36 @@ class Ambassador(models.Model):
         related_name="ambassadors",
         verbose_name="Программа в Практикуме",
     )
-    purpose = models.ManyToManyField(
+    purpose = models.ForeignKey(
         Purpose,
-        through="AmbassadorPurpose",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=False,
         related_name="ambassadors",
         verbose_name="Цель в Практикуме",
     )
 
-    about_me = models.TextField(null=True, blank=True, verbose_name="О себе")
-    comment = models.TextField(null=True, blank=True, verbose_name="Комментарий")
+    personal_purpose = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Персональная цель в Практикуме"
+    )
+
+    about_me = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="О себе")
+    comment = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Комментарий")
 
     class Meta:
         verbose_name = "Амбассадор"
         verbose_name_plural = "Амбассадоры"
 
     def __str__(self):
-        return (
-            f"{self.name} ({self.status}) {self.tutor} {self.program} {self.email}"
-        )
+        return self.name
 
 
 class AmbassadorActivity(models.Model):
@@ -192,16 +201,4 @@ class AmbassadorActivity(models.Model):
     activity = models.ForeignKey(
         Activity,
         on_delete=models.CASCADE,
-    )
-
-
-class AmbassadorPurpose(models.Model):
-    """Describe Ambassador and Purpose relations"""
-
-    ambassador = models.ForeignKey(
-        Ambassador, on_delete=models.CASCADE
-    )
-
-    purpose = models.ForeignKey(
-        Purpose, on_delete=models.CASCADE
     )
