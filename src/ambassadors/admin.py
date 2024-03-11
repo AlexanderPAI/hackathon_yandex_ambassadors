@@ -1,13 +1,6 @@
 from django.contrib import admin
 
-from .models import (
-    Activity,
-    Address,
-    Ambassador,
-    Program,
-    Purpose,
-    Status,
-)
+from .models import Activity, Address, Ambassador, Program, Purpose, Status
 
 
 @admin.register(Ambassador)

@@ -169,19 +169,11 @@ class Ambassador(models.Model):
     )
 
     personal_purpose = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name="Персональная цель в Практикуме"
+        null=True, blank=True, verbose_name="Персональная цель в Практикуме"
     )
 
-    about_me = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name="О себе")
-    comment = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name="Комментарий")
+    about_me = models.TextField(null=True, blank=True, verbose_name="О себе")
+    comment = models.TextField(null=True, blank=True, verbose_name="Комментарий")
 
     class Meta:
         verbose_name = "Амбассадор"
