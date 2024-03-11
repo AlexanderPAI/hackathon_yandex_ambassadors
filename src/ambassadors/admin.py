@@ -39,7 +39,7 @@ class ProgramAdmin(admin.ModelAdmin):
 class PurposeAdmin(admin.ModelAdmin):
     """Add Purpose to admin panel"""
 
-    list_display = ("pk", "name", "slug", "personal_purpose")
+    list_display = ("pk", "name", "slug")
     list_display_links = ("name",)
 
 
