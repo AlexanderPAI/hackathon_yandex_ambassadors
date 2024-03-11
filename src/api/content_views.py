@@ -1,3 +1,6 @@
+from django.utils.decorators import method_decorator
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.viewsets import ModelViewSet
 
 from ambassadors.models import Ambassador
@@ -35,7 +38,21 @@ class GuideKitViewSet(DestroyWithPayloadMixin, ModelViewSet):
             return GuideKitCreateUpdateSerializer
         return GuideKitSerializer
 
+    def get_queryset(self):
+        return GuideKitSerializer.setup_eager_loading(GuideKit.objects.all())
 
+
+ambassador = openapi.Parameter(
+    "ambassador",
+    openapi.IN_QUERY,
+    description=("ambassador"),
+    type=openapi.TYPE_INTEGER,
+)
+
+
+@method_decorator(
+    name="list", decorator=swagger_auto_schema(manual_parameters=[ambassador])
+)
 class GuideViewSet(DestroyWithPayloadMixin, ModelViewSet):
     """Представление гайда."""
 
@@ -49,11 +66,12 @@ class GuideViewSet(DestroyWithPayloadMixin, ModelViewSet):
 
     def get_queryset(self):
         params = self.request.query_params
+        all_guides = GuideSerializer.setup_eager_loading(Guide.objects.all())
         if "ambassador" in params:
-            return Guide.objects.filter(
+            return all_guides.filter(
                 ambassador=params["ambassador"],
             )
-        return Guide.objects.all()
+        return all_guides
 
 
 class MerchPhotoViewSet(DestroyWithPayloadMixin, ModelViewSet):
@@ -96,6 +114,9 @@ class ContentPageViewSet(ModelViewSet):
     queryset = Ambassador.objects.all()
     serializer_class = ContentPageSerialzier
     http_method_names = ["get", "patch"]
+
+    def get_queryset(self):
+        return ContentPageSerialzier.setup_eager_loading(Ambassador.objects.all())
 
     # def get_serializer_class(self):
     #     if self.action == 'partial_update':
