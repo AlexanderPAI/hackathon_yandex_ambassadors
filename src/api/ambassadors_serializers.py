@@ -289,6 +289,7 @@ class AmbassadorUpdateSerializer(serializers.ModelSerializer):
             instance.address.country = address["country"]
             instance.address.city = address["city"]
             instance.address.street = address["street"]
+            instance.address.save()
 
         if "purpose" in validated_data:
             instance.purpose = validated_data.pop("purpose")["purpose"]
