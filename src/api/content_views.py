@@ -1,12 +1,11 @@
 from rest_framework.viewsets import ModelViewSet
 
 from ambassadors.models import Ambassador
-from api.content_serializers import (
+from api.content_serializers import (  # ContentPageUpdateSerializer,
     ContentCreateSerializer,
-    ContentUpdateSerializer,
     ContentPageSerialzier,
-    # ContentPageUpdateSerializer,
     ContentSerializer,
+    ContentUpdateSerializer,
     GuideCreateUpdateSerializer,
     GuideKitCreateUpdateSerializer,
     GuideKitSerializer,
@@ -81,7 +80,7 @@ class ContentPageViewSet(ModelViewSet):
 
     queryset = Ambassador.objects.all()
     serializer_class = ContentPageSerialzier
-    http_method_names = ['get', 'patch']
+    http_method_names = ["get", "patch"]
 
     # def get_serializer_class(self):
     #     if self.action == 'partial_update':
