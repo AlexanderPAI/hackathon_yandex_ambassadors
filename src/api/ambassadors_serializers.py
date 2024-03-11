@@ -279,7 +279,9 @@ class AmbassadorUpdateSerializer(serializers.ModelSerializer):
         instance.tutor = validated_data.pop("tutor", instance.tutor)
 
         if "program" in validated_data:
-            instance.program = validated_data.pop("program")["program"]
+            program_query = validated_data.pop("program")
+            program, status = Program.objects.get_or_create(name=program_query["name"])
+            instance.program = program
 
         if "address" in validated_data:
             address = validated_data.pop("address")
@@ -299,6 +301,7 @@ class AmbassadorUpdateSerializer(serializers.ModelSerializer):
             for activity in validated_data["activity"]:
                 activity, status = Activity.objects.get_or_create(name=activity["name"])
                 AmbassadorActivity(ambassador=instance, activity=activity).save()
+
         instance.save()
         return instance
 

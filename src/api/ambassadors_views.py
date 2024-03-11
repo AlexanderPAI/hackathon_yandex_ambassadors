@@ -50,6 +50,7 @@ class AmbassadorViewSet(DestroyWithPayloadMixin, ModelViewSet):
         "retrieve": AmbassadorReadSerializer,
         "create": AmbassadorCreateSerializer,
         "update": AmbassadorUpdateSerializer,
+        "partial_update": AmbassadorUpdateSerializer,
     }
 
     def get_serializer_class(self):
