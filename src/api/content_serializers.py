@@ -1,6 +1,7 @@
 import base64
 
 from django.core.files.base import ContentFile
+from django.db.models import Prefetch
 from rest_framework import serializers
 
 from ambassadors.models import Ambassador
@@ -78,6 +79,11 @@ class GuideKitSerializer(serializers.ModelSerializer):
         model = GuideKit
         fields = "__all__"
 
+    @classmethod
+    def setup_eager_loading(cls, queryset):
+        """Performs necessary eager loading of guide kit data."""
+        return queryset.prefetch_related("tasks")
+
 
 class GuideTaskGuideKitCreateSerializer(serializers.ModelSerializer):
     """Сериализатор для создания вспомогательной модели."""
@@ -140,6 +146,13 @@ class GuideSerializer(serializers.ModelSerializer):
     class Meta:
         model = Guide
         fields = "__all__"
+
+    @classmethod
+    def setup_eager_loading(cls, queryset):
+        """Performs necessary eager loading of guide data."""
+        return queryset.prefetch_related(
+            Prefetch("guide_kit", queryset=GuideKit.objects.prefetch_related("tasks"))
+        )
 
 
 class GuideCreateUpdateSerializer(serializers.ModelSerializer):
@@ -251,6 +264,11 @@ class ContentPageSerialzier(serializers.ModelSerializer):
             "sending_merch",
             # "guide_status",
         )
+
+    @classmethod
+    def setup_eager_loading(cls, queryset):
+        """Performs necessary eager loading of content page data."""
+        return queryset.prefetch_related("content")
 
     def get_review(self, obj):
         review = obj.content.filter(type="review")
